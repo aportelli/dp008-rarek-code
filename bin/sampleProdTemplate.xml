@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<grid>
+    <trajRange>
+        <start>1000</start>
+        <end>1020</end>
+        <step>20</step>
+    </trajRange>
+    <timePar>
+        <dt>2</dt>
+        <dtK>0</dtK>
+        <dtJ>2</dtJ>
+        <dtP>4</dtP>
+    </timePar>
+    <momPar>
+        <kmom>0. 0. 0. 0.</kmom>
+        <pmom>1. 0. 0. 0.</pmom>
+        <qmom>-1. 0. 0. 0.</qmom>
+        <mqmom>1. 0. 0. 0.</mqmom>
+        <sinkkmom>0. 0. 0.</sinkkmom>
+        <sinkpmom>1. 0. 0.</sinkpmom>
+        <sinkqmom>-1. 0. 0.</sinkqmom>
+        <supplemental>false</supplemental>
+    </momPar>
+    <gammaPar>
+        <twoPtGammas>(Gamma5 Gamma5)</twoPtGammas>
+        <threePtGammaIn>Gamma5</threePtGammaIn>
+        <threePtGammaOut>Gamma5</threePtGammaOut>
+        <localGamma>GammaT</localGamma>
+        <threePtGammaInsertions>Identity GammaT GammaX GammaY GammaZ</threePtGammaInsertions>
+    </gammaPar>
+    <ioPar>
+        <gaugeFile></gaugeFile>
+        <epackFile></epackFile>
+        <epackSize>0</epackSize>
+        <epackLs>0</epackLs>
+        <epackMultiFile>false</epackMultiFile>
+        <scheduleFile></scheduleFile>
+        <resultPStem>./result/multiSparseTest/1_0_0</resultPStem>
+        <resultZeroStem>./result/multiSparseTest/0_0_0</resultZeroStem>
+        <xmlFileName>./par/sampleProd.xml</xmlFileName>
+    </ioPar>
+    <zMobiusPar>
+        <Ls>10</Ls>
+        <M5>1.8</M5>
+        <b>1.0</b>
+        <c>0.0</c>
+        <omega>
+          <elem>(1.458064389850479e+00,-0.000000000000000e+00)</elem>
+          <elem>(1.182313183893475e+00,-0.000000000000000e+00)</elem>
+          <elem>(8.309511666859551e-01,-0.000000000000000e+00)</elem>
+          <elem>(5.423524091567911e-01,-0.000000000000000e+00)</elem>
+          <elem>(3.419850204537295e-01,-0.000000000000000e+00)</elem>
+          <elem>(2.113790261902896e-01,-0.000000000000000e+00)</elem>
+          <elem>(1.260742995029118e-01,-0.000000000000000e+00)</elem>
+          <elem>(9.901366519626265e-02,-0.000000000000000e+00)</elem>
+          <elem>(6.863249884465925e-02,5.506585308274019e-02)</elem>
+          <elem>(6.863249884465925e-02,-5.506585308274019e-02)</elem>
+        </omega>
+    </zMobiusPar>
+    <lightActionPar>
+        <mass>0.00078</mass>
+        <residual>1e-08</residual>
+    </lightActionPar>
+    <charm1ActionPar>
+        <mass>0.20</mass>
+        <residual>1e-08</residual>
+    </charm1ActionPar>
+    <charm2ActionPar>
+        <mass>0.25</mass>
+        <residual>1e-08</residual>
+    </charm2ActionPar>
+    <charm3ActionPar>
+        <mass>0.30</mass>
+        <residual>1e-08</residual>
+    </charm3ActionPar>
+    <strangeActionPar>
+        <mass>0.0362</mass>
+        <Ls>24</Ls>
+        <M5>1.8</M5>
+        <scale>2.0</scale>
+        <residual>1e-08</residual>
+    </strangeActionPar>
+</grid>
