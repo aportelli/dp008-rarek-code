@@ -3,4 +3,4 @@ ACLOCAL_AMFLAGS = $(ACLOCAL_FLAGS)
 
 bin_PROGRAMS = rareKaonProd
 
-rareKSeqProd_SOURCES = rareKaonProd.cpp
+rareKaonProd_SOURCES = rareKaonProd.cpp

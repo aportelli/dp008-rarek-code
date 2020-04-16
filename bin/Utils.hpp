@@ -166,10 +166,10 @@ void makeZSparseSpinColorDiagonal(Application &application, const unsigned int n
 {
     if (!(VirtualMachine::getInstance().hasModule(name)))
     {
-        MNoise::ZSparseSpinColorDiagonal::Par sparsePar;
+        MNoise::SparseSpinColorDiagonal::Par sparsePar;
         sparsePar.nsrc = nsrc;
         sparsePar.nsparse = nsparse;
-        application.createModule<MNoise::ZSparseSpinColorDiagonal>(name, sparsePar);
+        application.createModule<MNoise::SparseSpinColorDiagonal>(name, sparsePar);
     }
 }
 
@@ -178,9 +178,9 @@ void makeZ2Diluted(Application &application, const std::string noise,
 {
     if (!(VirtualMachine::getInstance().hasModule(name)))
     {
-        MSource::ZZ2Diluted::Par dilutedPar;
+        MSource::Z2Diluted::Par dilutedPar;
         dilutedPar.noise = noise;
-        application.createModule<MSource::ZZ2Diluted>(name, dilutedPar);
+        application.createModule<MSource::Z2Diluted>(name, dilutedPar);
     }
 }
 
