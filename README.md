@@ -1,3 +1,13 @@
-# Rare Kaon Production Binary
+# Rare Kaon production code
 
-A placeholder for the rare kaon production repo. This will follow Antonin's template as it becomes available/
+Install [Grid](https://github.com/paboyle/Grid) 
+and [Hadrons](https://github.com/aportelli/Hadrons) on their `develop` branch.
+Then:
+
+``` bash
+./bootstrap.sh
+mkdir build
+cd build
+../configure --with-hadrons=<Hadrons install prefix> CXX=<compiler used to compile Grid>
+make
+```

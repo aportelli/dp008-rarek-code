@@ -335,11 +335,9 @@ int main(int argc, char *argv[])
     makeZ2SparseSources(application, nsrc, nsparse, sparseNoises);
     unpackProps(application, sparseNoises, sparseNoise);
 
-    std::vector<std::vector<std::string>> sparseLoops, seqSparseLoops;//, seqSparseProps;//, sparseProps, 
-    // sparseProps.resize(flavour.size());
+    std::vector<std::vector<std::string>> sparseLoops, seqSparseLoops;
     sparseLoops.resize(flavour.size(), std::vector<std::string>(nds));
     seqSparseLoops.resize(flavour.size(), std::vector<std::string>(nds));
-    // seqSparseLoops.resize(flavour.size());
     for (unsigned int i = 1; i < flavour.size(); ++i)
     {
         solver = "mcg_" + flavour[i];
@@ -425,14 +423,21 @@ int main(int argc, char *argv[])
         //////////////////////////////////////////////////
         // Sequential propagators
         //////////////////////////////////////////////////
+        std::string wallSourceKmomK = makeWallSourceName(tk, kmom);
+        std::string wallSourcePmomK = makeWallSourceName(tp, kmom);
+        std::string wallSourcePmomP = makeWallSourceName(tp, pmom);
         std::string seqGmuKLQmom = "G" + smu + "_KL_" + qWallklZeromom;
-        makeSeqZProp(application, lightSolver, lightAction, tj, qmom, qWallklZeromom, seqGmuKLQmom);
+        makeSeqZProp(application, lightSolver, lightAction, 
+                     tj, qmom, qWallklZeromom, wallSourceKmomK, seqGmuKLQmom);
         std::string seqGmuKSMqmom = "G" + smu + "_KS_" + qWallksZeromom;
-        makeSeqProp(application, strangeSolver, strangeAction, tj, mqmom, qWallksZeromom, seqGmuKSMqmom);
+        makeSeqProp(application, strangeSolver, strangeAction,
+                    tj, mqmom, qWallksZeromom, wallSourceKmomK, seqGmuKSMqmom);
         std::string seqGmuPLMqmom = "G" + smu + "_PL_" + qWallplZeromom;
-        makeSeqZProp(application, lightSolver, lightAction, tj, mqmom, qWallplZeromom, seqGmuPLMqmom);
+        makeSeqZProp(application, lightSolver, lightAction,
+                     tj, mqmom, qWallplZeromom, wallSourcePmomK, seqGmuPLMqmom);
         std::string seqGmuPLbarQmom = "G" + smu + "_PLbar_" + qWallplbarPmom;
-        makeSeqZProp(application, lightSolver, lightAction, tj, qmom, qWallplbarPmom, seqGmuPLbarQmom);
+        makeSeqZProp(application, lightSolver, lightAction,
+                     tj, qmom, qWallplbarPmom, wallSourcePmomP, seqGmuPLbarQmom);
 
         // Smeared sequential propagators
         std::string smearedqWallGmuKLQmom = "smearedQWall_Kl_VC" + smu + "_Qmom_" + stk;
@@ -667,7 +672,7 @@ int main(int argc, char *argv[])
             std::string seqSparseProps = "seqSparseProps_" + flavour[i] + "_" + timeStamp;
             std::string seqSparseProp = "seqSparseProp_" + flavour[i] + "_" + timeStamp;
 
-            makeSeqZProp(application, solver, action, tj, qmom, sparseProps, seqSparseProps);
+            makeSeqZProp(application, solver, action, tj, qmom, sparseProps, sparseNoises, seqSparseProps);
             unpackProps(application, seqSparseProps, seqSparseProp);
             makeLoops(application, seqSparseProp, sparseNoise, seqSparseLoops[i]);
         }

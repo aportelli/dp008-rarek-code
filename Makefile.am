@@ -1,4 +1,6 @@
-AUTOMAKE_OPTIONS = foreign
-ACLOCAL_AMFLAGS = -I .buildutils/m4
-AM_CXXFLAGS = -fPIC -Wall -Wextra
-SUBDIRS = bin 
+AUTOMAKE_OPTIONS = subdir-objects
+ACLOCAL_AMFLAGS = $(ACLOCAL_FLAGS)
+
+bin_PROGRAMS = rareKaonProd
+
+rareKaonProd_SOURCES = rareKaonProd.cpp

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
+set -e
 
-rm -rf .buildutils
+echo '-- generating configure script...'
 mkdir -p .buildutils/m4
 autoreconf -fvi

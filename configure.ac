@@ -6,7 +6,8 @@ AC_INIT([RareK48_Production], [0.1], [fionn.o.hogain@ed.ac.uk])
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
-AC_CONFIG_SRCDIR([bin/rareKaonProd.cpp])
+AC_CONFIG_SRCDIR([rareKaonProd.cpp])
+AC_CONFIG_MACRO_DIR([.buildutils/m4])
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
@@ -16,8 +17,8 @@ AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_RANLIB
 AM_PROG_AR
-
 AC_LANG([C++])
+
 AC_ARG_WITH([hadrons],
     [AS_HELP_STRING([--with-hadrons=<prefix>],
     [try this for a non-standard install prefix of Hadrons])],
@@ -32,7 +33,7 @@ CXXFLAGS="$CXXFLAGS `grid-config --cxxflags`"
 LDFLAGS="$LDFLAGS `grid-config --ldflags`"
 CXXFLAGS="$AM_CXXFLAGS $CXXFLAGS"
 LDFLAGS="$AM_LDFLAGS $LDFLAGS"
-LIBS="$LIBS -lHadrons -lGrid `grid-config --libs`"
+LIBS="$LIBS -lHadrons $LIBS `hadrons-config --libs`"
 AC_MSG_CHECKING([that a minimal Grid/Hadrons program compiles]);
 AC_LINK_IFELSE(
         [AC_LANG_SOURCE([[
@@ -45,8 +46,9 @@ AC_LINK_IFELSE(
     int main(int argc, char *argv[])
     {
         Grid_init(&argc, &argv);
-        Application application;
         Grid_finalize();
+        Application application;
+        application.run();
 
         return 0;
     }
@@ -54,10 +56,10 @@ AC_LINK_IFELSE(
     ]])],
         [AC_MSG_RESULT([yes])],
     [AC_MSG_RESULT([no])]
-    [AC_MSG_ERROR([Could not compile a minimal Grid/Hadrons program])])
+    [AC_MSG_ERROR([Could not compile a minimal Hadrons program])])
 
 AC_SUBST([AM_CXXFLAGS])
 AC_SUBST([AM_LDFLAGS])
-AC_CONFIG_FILES([Makefile bin/Makefile])
+AC_CONFIG_FILES([Makefile Makefile])
 AC_OUTPUT
 

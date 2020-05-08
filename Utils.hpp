@@ -104,6 +104,7 @@ void makeSmearedProp(Application &application, const std::string prop,
 }
 
 void makeZSequentialSource(Application &application, const std::string q,
+                           const std::string source,
                            const std::string action, const unsigned int tJ,
                            const std::string mom, const std::string name,
                            const unsigned int mu = 3, const Current curr_type = Current::Vector)
@@ -111,6 +112,7 @@ void makeZSequentialSource(Application &application, const std::string q,
     std::string q5d = q + "_5d";
     MSource::ZSeqConserved::Par zSeqSrcPar;
     zSeqSrcPar.q = q5d;
+    zSeqSrcPar.source = source;
     zSeqSrcPar.action = action;
     zSeqSrcPar.tA = tJ;
     zSeqSrcPar.tB = tJ;
@@ -123,6 +125,7 @@ void makeZSequentialSource(Application &application, const std::string q,
 }
 
 void makeSequentialSource(Application &application, const std::string q,
+                           const std::string source,
                            const std::string action, const unsigned int tJ,
                            const std::string mom, const std::string name,
                            const unsigned int mu = 3, const Current curr_type = Current::Vector)
@@ -130,6 +133,7 @@ void makeSequentialSource(Application &application, const std::string q,
     std::string q5d = q + "_5d";
     MSource::SeqConserved::Par seqSrcPar;
     seqSrcPar.q = q5d;
+    seqSrcPar.source = source;
     seqSrcPar.action = action;
     seqSrcPar.tA = tJ;
     seqSrcPar.tB = tJ;
@@ -144,20 +148,20 @@ void makeSequentialSource(Application &application, const std::string q,
 void makeSeqProp(Application &application, const std::string solver,
                  const std::string action, const unsigned int tJ,
                  const std::string mom, const std::string propName,
-                 const std::string seqPropName)
+                 const std::string source, const std::string seqPropName)
 {
     std::string srcName = makeSeqSourceName(tJ, mom, seqPropName);
-    makeSequentialSource(application, propName, action, tJ, mom, srcName);
+    makeSequentialSource(application, propName, source, action, tJ, mom, srcName);
     makeGaugeProp(application, solver, srcName, seqPropName);
 }
 
 void makeSeqZProp(Application &application, const std::string solver,
                   const std::string action, const unsigned int tJ,
                   const std::string mom, const std::string propName,
-                  const std::string seqPropName)
+                  const std::string source, const std::string seqPropName)
 {
     std::string srcName = makeSeqSourceName(tJ, mom, seqPropName);
-    makeZSequentialSource(application, propName, action, tJ, mom, srcName);
+    makeZSequentialSource(application, propName, source, action, tJ, mom, srcName);
     makeZGaugeProp(application, solver, srcName, seqPropName);
 }
 
