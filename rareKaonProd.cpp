@@ -426,16 +426,16 @@ int main(int argc, char *argv[])
         std::string wallSourceKmomK = makeWallSourceName(tk, kmom);
         std::string wallSourcePmomK = makeWallSourceName(tp, kmom);
         std::string wallSourcePmomP = makeWallSourceName(tp, pmom);
-        std::string seqGmuKLQmom = "G" + smu + "_KL_" + qWallklZeromom;
+        std::string seqGmuKLQmom = "VC" + smu + "_KL_" + qWallklZeromom;
         makeSeqZProp(application, lightSolver, lightAction, 
                      tj, qmom, qWallklZeromom, wallSourceKmomK, seqGmuKLQmom);
-        std::string seqGmuKSMqmom = "G" + smu + "_KS_" + qWallksZeromom;
+        std::string seqGmuKSMqmom = "VC" + smu + "_KS_" + qWallksZeromom;
         makeSeqProp(application, strangeSolver, strangeAction,
                     tj, mqmom, qWallksZeromom, wallSourceKmomK, seqGmuKSMqmom);
-        std::string seqGmuPLMqmom = "G" + smu + "_PL_" + qWallplZeromom;
+        std::string seqGmuPLMqmom = "VC" + smu + "_PL_" + qWallplZeromom;
         makeSeqZProp(application, lightSolver, lightAction,
                      tj, mqmom, qWallplZeromom, wallSourcePmomK, seqGmuPLMqmom);
-        std::string seqGmuPLbarQmom = "G" + smu + "_PLbar_" + qWallplbarPmom;
+        std::string seqGmuPLbarQmom = "VC" + smu + "_PLbar_" + qWallplbarPmom;
         makeSeqZProp(application, lightSolver, lightAction,
                      tj, qmom, qWallplbarPmom, wallSourcePmomP, seqGmuPLbarQmom);
 
@@ -459,22 +459,22 @@ int main(int argc, char *argv[])
         // Kaon Meson Contractions: Wall-point
         //////////////////////////////////////////////////
         // Kaon momentum 
-        std::string wallPointMesonKZeromomRes = resultPStem + "/2pt/WallPoint/2ptK_mom_K_tK_" + timeStamp;
+        std::string wallPointMesonKZeromomRes = resultPStem + "/2pt/WallPoint/2ptKaon_WP_mom_K_tK_" + timeStamp;
         std::string wallPointMesonKZeromom = "wallPointMesonKZeromom_" + stk;
         makeMeson(application, qWallklZeromom, qWallksZeromom, sink2ptZeromom,
                   twoPtGammas, wallPointMesonKZeromomRes, wallPointMesonKZeromom);
         // Pion momentum
-        std::string wallPointMesonKPmomRes = resultPStem + "/2pt/WallPoint/2ptK_mom_P_tK_" + timeStamp;
+        std::string wallPointMesonKPmomRes = resultPStem + "/2pt/WallPoint/2ptKaon_WP_mom_P_tK_" + timeStamp;
         std::string wallPointMesonKPmom = "wallPointMesonKPmom_" + stk;
         makeMeson(application, qWallklZeromom, qWallksPmom, sink2ptPmom,
                   twoPtGammas, wallPointMesonKPmomRes, wallPointMesonKPmom);
         // Light insetion: K->pi momentum
-        std::string wallPointMesonKGmuLRes = resultPStem + "/3pt/WallPoint/3ptK_VC" + smu + "L_tK_" + timeStamp;
+        std::string wallPointMesonKGmuLRes = resultPStem + "/3pt/WallPoint/3ptKaon_WP_VC" + smu + "L_tK_" + timeStamp;
         std::string wallPointMesonKGmuL = "wallPointMesonKGmuL_" + stk;
         makeMeson(application, seqGmuKLQmom, qWallksZeromom, sink2ptPmom,
                   twoPtGammas, wallPointMesonKGmuLRes, wallPointMesonKGmuL);
         // Strange insetion: K->pi momentum
-        std::string wallPointMesonKGmuSRes = resultPStem + "/3pt/WallPoint/3ptK_VC" + smu + "S_tK_" + timeStamp;
+        std::string wallPointMesonKGmuSRes = resultPStem + "/3pt/WallPoint/3ptKaon_WP_VC" + smu + "S_tK_" + timeStamp;
         std::string wallPointMesonKGmuS = "wallPointMesonKGmuS_" + stk;
         makeMeson(application, qWallklZeromom, seqGmuKSMqmom, sink2ptPmom,
                   twoPtGammas, wallPointMesonKGmuSRes, wallPointMesonKGmuS);
@@ -483,22 +483,22 @@ int main(int argc, char *argv[])
         // Kaon Meson Contractions: Wall-wall
         //////////////////////////////////////////////////
         // Kaon momentum 
-        std::string wallWallMesonKZeromomRes = resultPStem + "/2pt/WallWall/2ptK_mom_K_tK_" + timeStamp;
+        std::string wallWallMesonKZeromomRes = resultPStem + "/2pt/WallWall/2ptKaon_WW_mom_K_tK_" + timeStamp;
         std::string wallWallMesonKZeromom = "wallWallMesonKZeromom_" + stk;
         makeMeson(application, smearedqWallklZeromom, smearedqWallksZeromom, sink2ptZeromom,
                   twoPtGammas, wallWallMesonKZeromomRes, wallWallMesonKZeromom);
         // Pion momentum
-        std::string wallWallMesonKPmomRes = resultPStem + "/2pt/WallWall/2ptK_mom_P_tK_" + timeStamp;
+        std::string wallWallMesonKPmomRes = resultPStem + "/2pt/WallWall/2ptKaon_WW_mom_P_tK_" + timeStamp;
         std::string wallWallMesonKPmom = "wallWallMesonKPmom_" + stk;
         makeMeson(application, smearedqWallklPmom, smearedqWallksPmom, sink2ptZeromom,
                   twoPtGammas, wallWallMesonKPmomRes, wallWallMesonKPmom);
         // Light insertion: K->pi momentum
-        std::string wallWallMesonKLRes = resultPStem + "/3pt/WallWall/3ptK_VC" + smu + "L_tK_" + timeStamp;
+        std::string wallWallMesonKLRes = resultPStem + "/3pt/WallWall/3ptKaon_WW_VC" + smu + "L_tK_" + timeStamp;
         std::string wallWallMesonKL = "wallWallMesonKL_" + stk;
         makeMeson(application, smearedqWallGmuKLQmom, smearedqWallksZeromom, sink2ptPmom,
                   twoPtGammas, wallWallMesonKLRes, wallWallMesonKL);
         // Strange instertion: K->pi momentum
-        std::string wallWallMesonKSRes = resultPStem + "/3pt/WallWall/3ptK_VC" + smu + "S_tK_" + timeStamp;
+        std::string wallWallMesonKSRes = resultPStem + "/3pt/WallWall/3ptKaon_WW_VC" + smu + "S_tK_" + timeStamp;
         std::string wallWallMesonKS = "wallWallMesonKS_" + stk;
         makeMeson(application, smearedqWallklPmom, smearedqWallGmuKSmQmom, sink2ptPmom,
                   twoPtGammas, wallWallMesonKSRes, wallWallMesonKS);
@@ -507,22 +507,22 @@ int main(int argc, char *argv[])
         // Pion Meson Contractions: Wall-point
         //////////////////////////////////////////////////
         // Kaon momentum
-        std::string wallPointPiZeromomRes = resultPStem + "/2pt/WallPoint/2ptPi_mom_K_tK_" + timeStamp;
+        std::string wallPointPiZeromomRes = resultPStem + "/2pt/WallPoint/2ptPion_WP_mom_K_tK_" + timeStamp;
         std::string wallPointPiZeromom = "wallPointPiZeromom_" + stk;
         makeMeson(application, qWallplZeromom, qWallplZeromom, sink2ptZeromom,
                   twoPtGammas, wallPointPiZeromomRes, wallPointPiZeromom);
         // Pion momentum
-        std::string wallPointPiPmomRes = resultPStem + "/2pt/WallPoint/2ptPi_mom_P_tK_" + timeStamp;
+        std::string wallPointPiPmomRes = resultPStem + "/2pt/WallPoint/2ptPion_WP_mom_P_tK_" + timeStamp;
         std::string wallPointPiPmom = "wallPointPiPmom_" + stk;
         makeMeson(application, qWallplZeromom, qWallplbarPmom, sink2ptPmom,
                   twoPtGammas, wallPointPiPmomRes, wallPointPiPmom);
         // Light insetion: K->pi momentum
-        std::string wallPointPiGmuLRes = resultPStem + "/3pt/WallPoint/3ptPi_VC" + smu + "L_tK_" + timeStamp;
+        std::string wallPointPiGmuLRes = resultPStem + "/3pt/WallPoint/3ptPion_WP_VC" + smu + "L_tK_" + timeStamp;
         std::string wallPointPiGmuL = "wallPointPiGmuL_" + stk;
         makeMeson(application, seqGmuPLMqmom, qWallplbarPmom, sink2ptZeromom,
                   twoPtGammas, wallPointPiGmuLRes, wallPointPiGmuL);
         // Lightbar insetion: K->pi momentum
-        std::string wallPointPiGmuLbarRes = resultPStem + "/3pt/WallPoint/3ptPi_VC" + smu + "Lbar_tK_" + timeStamp;
+        std::string wallPointPiGmuLbarRes = resultPStem + "/3pt/WallPoint/3ptPion_WP_VC" + smu + "Lbar_tK_" + timeStamp;
         std::string wallPointPiGmuLbar = "wallPointPiGmuLbar_" + stk;
         makeMeson(application, qWallplZeromom, seqGmuPLbarQmom, sink2ptZeromom,
                   twoPtGammas, wallPointPiGmuLbarRes, wallPointPiGmuLbar);
@@ -531,22 +531,22 @@ int main(int argc, char *argv[])
         // Pion Meson Contractions: Wall-wall
         //////////////////////////////////////////////////
         // Kaon momentum
-        std::string wallWallMesonPiZeromomRes = resultPStem + "/2pt/WallWall/2ptPi_mom_K_tK_" + timeStamp;
+        std::string wallWallMesonPiZeromomRes = resultPStem + "/2pt/WallWall/2ptPion_WW_mom_K_tK_" + timeStamp;
         std::string wallWallMesonPiZeromom = "wallWallMesonPiZeromom_" + stk;
         makeMeson(application, smearedqWallplZeromom, smearedqWallplZeromom, sink2ptZeromom,
                   twoPtGammas, wallWallMesonPiZeromomRes, wallWallMesonPiZeromom);
         // Pion momentum
-        std::string wallWallMesonPiPmomRes = resultPStem + "/2pt/WallWall/2ptPi_mom_P_tK_" + timeStamp;
+        std::string wallWallMesonPiPmomRes = resultPStem + "/2pt/WallWall/2ptPion_WW_mom_P_tK_" + timeStamp;
         std::string wallWallMesonPiPmom = "wallWallMesonPiPmom_" + stk;
         makeMeson(application, smearedqWallplPmom, smearedqWallplPmom, sink2ptPmom,
                   twoPtGammas, wallWallMesonPiPmomRes, wallWallMesonPiPmom);
         // Light insertion: K->pi momentum
-        std::string wallWallmesonPiLRes = resultPStem + "/3pt/WallWall/3ptPi_VC" + smu + "l_tK_" + timeStamp;
+        std::string wallWallmesonPiLRes = resultPStem + "/3pt/WallWall/3ptPion_WW_VC" + smu + "l_tK_" + timeStamp;
         std::string wallWallmesonPiL = "wallWallmesonPiL_" + stk;
         makeMeson(application, smearedqWallGmuPLmQmom, smearedqWallplPmom, sink2ptZeromom,
                   twoPtGammas, wallWallmesonPiLRes, wallWallmesonPiL);
         // Lightbar insertion: K->pi momentum
-        std::string wallWallmesonPiLbarRes = resultPStem + "/3pt/WallWall/3ptPi_VC" + smu + "lbar_tK_" + timeStamp;
+        std::string wallWallmesonPiLbarRes = resultPStem + "/3pt/WallWall/3ptPion_WW_VC" + smu + "lbar_tK_" + timeStamp;
         std::string wallWallmesonPiLbar = "wallWallmesonPiLbar_" + stk;
         makeMeson(application, smearedqWallplZeromom, smearedqWallGmuPLbarQmom, sink2ptZeromom,
                   twoPtGammas, wallWallmesonPiLbarRes, wallWallmesonPiLbar);
@@ -556,27 +556,27 @@ int main(int argc, char *argv[])
         //////////////////////////////////////////////////
         // s -> d
         // Kaon momentum
-        std::string kaonSDGamma3ptRes = resultPStem + "/3pt/3pt_sd_mom_K_tK_" + timeStamp;
+        std::string kaonSDGamma3ptRes = resultPStem + "/3pt/sd/3pt_sd_mom_K_tK_" + timeStamp;
         std::string kaonSDGamma3pt = "kaonSDGamma3pt_" + stp;
         makeGamma3pt(application, smearedqWallklZeromom, qWallksZeromom, qWallplZeromom, tp,
                   gammaInsertions, kaonSDGamma3ptRes, kaonSDGamma3pt);
         // Pion momentum       
-        std::string pionSDGamma3ptRes = resultPStem + "/3pt/3pt_sd_mom_P_tK_" + timeStamp;
+        std::string pionSDGamma3ptRes = resultPStem + "/3pt/sd/3pt_sd_mom_P_tK_" + timeStamp;
         std::string pionSDGamma3pt = "pionSDGamma3pt_" + stp;
         makeGamma3pt(application, smearedqWallklZeromom, qWallksPmom, qWallplbarPmom, tp,
                   gammaInsertions, pionSDGamma3ptRes, pionSDGamma3pt);
         // Spec insertion
-        std::string specSDGamma3ptRes = resultPStem + "/4pt/4pt_sd_VC" + smu + "_spec_tK_" + timeStamp;
+        std::string specSDGamma3ptRes = resultPStem + "/4pt/sd/4pt_sd_VC" + smu + "_spec_tK_" + timeStamp;
         std::string specSDGamma3pt = "specSDGamma3pt_" + stp;
         makeGamma3pt(application, smearedqWallGmuKspecQmom, qWallksZeromom, qWallplbarPmom, tp,
                   gammaInsertions, specSDGamma3ptRes, specSDGamma3pt);
         // Strange insertion
-        std::string strangeSDGamma3ptRes = resultPStem + "/4pt/4pt_sd_VC" + smu + "_s_tK_" + timeStamp;
+        std::string strangeSDGamma3ptRes = resultPStem + "/4pt/sd/4pt_sd_VC" + smu + "_s_tK_" + timeStamp;
         std::string strangeSDGamma3pt = "strangeSDGamma3pt_" + stp;
         makeGamma3pt(application, smearedqWallklZeromom, seqGmuKSMqmom, qWallplbarPmom, tp,
                   gammaInsertions, strangeSDGamma3ptRes, strangeSDGamma3pt);
         // Light insertion
-        std::string lightSDGamma3ptRes = resultPStem + "/4pt/4pt_sd_VC" + smu + "_lbar_tK_" + timeStamp;
+        std::string lightSDGamma3ptRes = resultPStem + "/4pt/sd/4pt_sd_VC" + smu + "_lbar_tK_" + timeStamp;
         std::string lightSDGamma3pt = "lightSDGamma3pt_" + stp;
         makeGamma3pt(application, smearedqWallklZeromom, qWallksZeromom, seqGmuPLbarQmom, tp,
                   gammaInsertions, lightSDGamma3ptRes, lightSDGamma3pt);
@@ -586,34 +586,34 @@ int main(int argc, char *argv[])
         //////////////////////////////////////////////////
         // 3pt Contractions
         // Kaon momentum
-        std::string resWHNE3ptKmom = resultPStem + "/3pt/3pt_Hw_Non_Eye_mom_K_tK_" + timeStamp;
+        std::string resWHNE3ptKmom = resultPStem + "/3pt/HW/3pt_Hw_Non_Eye_mom_K_tK_" + timeStamp;
         std::string WHNE3ptKmom = "WHNE_3pt_Kmom" + stk;
         makeWeakNonEye(application, qWallklZeromom, qWallksZeromom, qWallplZeromom, qWallplZeromom,
                        gammaIn, gammaOut, resWHNE3ptKmom, WHNE3ptKmom);
         // Pion momentum
-        std::string resWHNE3ptPmom = resultPStem + "/3pt/3pt_Hw_Non_Eye_mom_Pi_tK_" + timeStamp;
+        std::string resWHNE3ptPmom = resultPStem + "/3pt/HW/3pt_Hw_Non_Eye_mom_Pi_tK_" + timeStamp;
         std::string WHNE3ptPmom = "WHNE_3pt_Pmom_" + stk;
         makeWeakNonEye(application, qWallklZeromom, qWallksPmom, qWallplZeromom, qWallplbarPmom,
                        gammaIn, gammaOut, resWHNE3ptPmom, WHNE3ptPmom);
 
         // 4pt Contractions
         // Kaon to pion momentum
-        std::string resWHNE4ptGmuKL = resultPStem + "/4pt/4pt_Non_Eye_VC" + smu + "KL_tK_" + timeStamp;
+        std::string resWHNE4ptGmuKL = resultPStem + "/4pt/RK/4pt_Non_Eye_VC" + smu + "KL_tK_" + timeStamp;
         std::string WHNE4ptGmuKL = "4pt_VC" + smu + "_KL_" + stk;
         makeWeakNonEye(application, seqGmuKLQmom, qWallksZeromom, qWallplZeromom, qWallplbarPmom,
                        gammaIn, gammaOut, resWHNE4ptGmuKL, WHNE4ptGmuKL);
 
-        std::string resWHNE4ptGmuKS = resultPStem + "/4pt/4pt_Non_Eye_VC" + smu + "KS_tK_" + timeStamp;
+        std::string resWHNE4ptGmuKS = resultPStem + "/4pt/RK/4pt_Non_Eye_VC" + smu + "KS_tK_" + timeStamp;
         std::string WHNE4ptGmuKS = "4pt_VC" + smu + "_KS_" + stk;
         makeWeakNonEye(application, qWallklZeromom, seqGmuKSMqmom, qWallplZeromom, qWallplbarPmom,
                        gammaIn, gammaOut, resWHNE4ptGmuKS, WHNE4ptGmuKS);
 
-        std::string resWHNE4ptGmuPL = resultPStem + "/4pt/4pt_Non_Eye_VC" + smu + "PL_tK_" + timeStamp;
+        std::string resWHNE4ptGmuPL = resultPStem + "/4pt/RK/4pt_Non_Eye_VC" + smu + "PL_tK_" + timeStamp;
         std::string WHNE4ptGmuPL = "4pt_VC" + smu + "_PL_" + stk;
         makeWeakNonEye(application, qWallklZeromom, qWallksZeromom, seqGmuPLMqmom, qWallplbarPmom,
                        gammaIn, gammaOut, resWHNE4ptGmuPL, WHNE4ptGmuPL);
 
-        std::string resWHNE4ptGmuPLbar = resultPStem + "/4pt/4pt_Non_Eye_VC" + smu + "PLbar_tK_" + timeStamp;
+        std::string resWHNE4ptGmuPLbar = resultPStem + "/4pt/RK/4pt_Non_Eye_VC" + smu + "PLbar_tK_" + timeStamp;
         std::string WHNE4ptGmuPLbar = "4pt_VC" + smu + "_PLbar_" + stk;
         makeWeakNonEye(application, qWallklZeromom, qWallksZeromom, qWallplZeromom, seqGmuPLbarQmom,
                        gammaIn, gammaOut, resWHNE4ptGmuPLbar, WHNE4ptGmuPLbar);
@@ -629,13 +629,13 @@ int main(int argc, char *argv[])
                 std::string sparseName = flavour[i] + "_" + std::to_string(j);
                 // 3pt Contractions
                 // Kaon momentum
-                std::string resWHE3ptKmom = resultPStem + "/3pt/3pt_Hw_Eye_" + sparseName
+                std::string resWHE3ptKmom = resultPStem + "/3pt/HW/3pt_Hw_Eye_" + sparseName
                                             + "_mom_K_tK_" + timeStamp;
                 std::string WHE3ptKmom = "WHE_Kmom_" + sparseName + "_tk_" +  stk;
                 makeWeakEye(application, qWallksZeromom, qWallplZeromom, smearedqWallklZeromom, loop3pt,
                             gammaIn, gammaOut, tp, resWHE3ptKmom, WHE3ptKmom);
                 // Pion momentum
-                std::string resWHE3ptPmom = resultPStem + "/3pt/3pt_Hw_Eye_" + sparseName
+                std::string resWHE3ptPmom = resultPStem + "/3pt/HW/3pt_Hw_Eye_" + sparseName
                                                + "_mom_Pi_tK_" + timeStamp;
                 std::string WHE3ptPmom = "WHE_Pmom_" + sparseName + "_tk_" +  stk;
                 makeWeakEye(application, qWallksPmom, qWallplbarPmom, smearedqWallklZeromom, loop3pt,
@@ -643,19 +643,19 @@ int main(int argc, char *argv[])
             
                 // 4pt Contractions
                 // Kaon to pion momentum
-                std::string resWHE4ptGmuspec = resultPStem + "/4pt/4pt_Eye_" + sparseName
+                std::string resWHE4ptGmuspec = resultPStem + "/4pt/RK/4pt_Eye_" + sparseName
                                                + "_VC" + smu + "_spec_tK_" + timeStamp;
                 std::string WHE4ptGmuspec = "4pt_VC" + smu + "_Eye_" + sparseName + "_spec_" + stk;
                 makeWeakEye(application, qWallksZeromom, qWallplbarPmom, smearedqWallGmuKspecQmom, loop3pt,
                             gammaIn, gammaOut, tp, resWHE4ptGmuspec, WHE4ptGmuspec);
 
-                std::string resWHE4ptGmuKS = resultPStem + "/4pt/4pt_Eye_" + sparseName
+                std::string resWHE4ptGmuKS = resultPStem + "/4pt/RK/4pt_Eye_" + sparseName
                                                + "_VC" + smu + "_KS_tK_" + timeStamp;
                 std::string WHE4ptGmuKS = "4pt_VC" + smu + "_Eye_" + sparseName + "_KS_" + stk;
                 makeWeakEye(application, seqGmuKSMqmom, qWallplbarPmom, smearedqWallklZeromom, loop3pt,
                             gammaIn, gammaOut, tp, resWHE4ptGmuKS, WHE4ptGmuKS);
 
-                std::string resWHE4ptGmuKLbar = resultPStem + "/4pt/4pt_Eye_" + sparseName
+                std::string resWHE4ptGmuKLbar = resultPStem + "/4pt/RK/4pt_Eye_" + sparseName
                                                + "_VC" + smu + "_PLbar_tK_" + timeStamp;
                 std::string WHE4ptGmuKLbar = "4pt_VC" + smu + "_Eye_" + sparseName + "_KLbar_" + stk;
                 makeWeakEye(application, qWallksZeromom, seqGmuPLbarQmom, smearedqWallklZeromom, loop3pt,
@@ -684,7 +684,7 @@ int main(int argc, char *argv[])
                 std::string seqLoop = seqSparseLoops[i][j];
                 std::string sparseName = flavour[i] + std::to_string(tj) + "_" + std::to_string(j);
 
-                std::string resWHE4ptGmuLoop = resultPStem + "/4pt/4pt_Eye" + sparseName
+                std::string resWHE4ptGmuLoop = resultPStem + "/4pt/RK/4pt_Eye" + sparseName
                                           + "_VC" + smu + "_Loop_tK_" + timeStamp;
                 std::string WHE4ptGmuLoop = "4pt_VC" + smu + "_Eye_Loop_" + sparseName + "_tK_" + stk;
                 makeWeakEye(application, qWallksZeromom, qWallplbarPmom, smearedqWallklZeromom, seqLoop,
