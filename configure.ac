@@ -22,18 +22,19 @@ AC_LANG([C++])
 AC_ARG_WITH([hadrons],
     [AS_HELP_STRING([--with-hadrons=<prefix>],
     [try this for a non-standard install prefix of Hadrons])],
-    [PATH="$PATH$PATH_SEPARATOR$with_hadrons/bin"]
-    [CXXFLAGS="-I$with_hadrons/include $CXXFLAGS"]
-    [LDFLAGS="-L$with_hadrons/lib $LDFLAGS"])
-AC_CHECK_PROG([GRIDCONF],[grid-config],[yes])
-if test x"$GRIDCONF" != x"yes" ; then
-    AC_MSG_ERROR([grid-config not found])
+    [PATH="$with_hadrons/bin$PATH_SEPARATOR$PATH"]
+    [CXXFLAGS="$CXXFLAGS -I$with_hadrons/include"]
+    [LDFLAGS="$LDFLAGS -L$with_hadrons/lib"])
+AC_CHECK_PROG([HADCONF],[hadrons-config],[yes])
+if test x"$HADCONF" != x"yes" ; then
+    AC_MSG_ERROR([hadrons-config not found])
 fi
-CXXFLAGS="$CXXFLAGS `grid-config --cxxflags`"
-LDFLAGS="$LDFLAGS `grid-config --ldflags`"
+CXXFLAGS="$CXXFLAGS `hadrons-config --cxxflags`"
+LDFLAGS="$LDFLAGS `hadrons-config --ldflags`"
 CXXFLAGS="$AM_CXXFLAGS $CXXFLAGS"
 LDFLAGS="$AM_LDFLAGS $LDFLAGS"
-LIBS="$LIBS -lHadrons $LIBS `hadrons-config --libs`"
+LIBS=" -lHadrons $LIBS `hadrons-config --libs`"
+
 AC_MSG_CHECKING([that a minimal Grid/Hadrons program compiles]);
 AC_LINK_IFELSE(
         [AC_LANG_SOURCE([[
