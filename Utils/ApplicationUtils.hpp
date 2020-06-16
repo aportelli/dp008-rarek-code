@@ -1,6 +1,8 @@
-#ifndef Production_Utils_hpp_
-#define Production_Utils_hpp_
+#ifndef Production_ApplicationUtils_hpp_
+#define Production_ApplicationUtils_hpp_
 
+#include "EntryUtils.hpp"
+#include "NamingUtils.hpp"
 #include <Hadrons/Application.hpp>
 #include <Hadrons/Modules.hpp>
 #include <Hadrons/VirtualMachine.hpp>
@@ -24,44 +26,28 @@ void makePointSink(Application &application, const std::string mom,
     application.createModule<MSink::Point>(name, pointSinkPar);
 }
 
-std::string makeWallSourceName(const unsigned int tW, const std::string mom)
-{
-    std::string wallSourceName = "wall_" + std::to_string(tW) + "_" + mom;
-    return  wallSourceName;
-}
-
-std::string makeZ2SparseSourceName(const std::string src, const unsigned int i)
-{
-    std::string z2SparseSourceName = src + "_" + std::to_string(i);
-    return  z2SparseSourceName;
-}
-
-std::string makeSeqSourceName(const unsigned int tJ, const std::string mom,
-                              const std::string propName, const Gamma::Algebra gamma = Gamma::Algebra::GammaT)
-{
-    std::string Gmu = std::to_string(gamma);
-    std::string seqSourceName = "G" + Gmu +
-                                 "_tJ_" + std::to_string(tJ) + "_" + mom +
-                                 "_" + propName;
-    return  seqSourceName;
-}
-
 void makeZGaugeProp(Application &application, const std::string solver,
                     const std::string source, const std::string name)
 {
-    MFermion::ZGaugeProp::Par zPropPar;
-    zPropPar.solver = solver;
-    zPropPar.source = source;
-    application.createModule<MFermion::ZGaugeProp>(name, zPropPar);
+    if (!(VirtualMachine::getInstance().hasModule(name)))
+    {
+      MFermion::ZGaugeProp::Par zPropPar;
+      zPropPar.solver = solver;
+      zPropPar.source = source;
+      application.createModule<MFermion::ZGaugeProp>(name, zPropPar);
+    }
 }
 
 void makeGaugeProp(Application &application, const std::string solver,
                    const std::string source, const std::string name)
 {
-    MFermion::GaugeProp::Par propPar;
-    propPar.solver = solver;
-    propPar.source = source;
-    application.createModule<MFermion::GaugeProp>(name, propPar);
+    if (!(VirtualMachine::getInstance().hasModule(name)))
+    {
+      MFermion::GaugeProp::Par propPar;
+      propPar.solver = solver;
+      propPar.source = source;
+      application.createModule<MFermion::GaugeProp>(name, propPar);
+    }
 }
 
 void makeWallSource(Application &application, const std::string mom,
@@ -97,10 +83,13 @@ void makeWallZProp(Application &application, const std::string solver,
 void makeSmearedProp(Application &application, const std::string prop,
                      const std::string sink, const std::string name)
 {
-    MSink::Smear::Par smearPropPar;
-    smearPropPar.q = prop;
-    smearPropPar.sink = sink;
-    application.createModule<MSink::Smear>(name, smearPropPar);
+    if (!(VirtualMachine::getInstance().hasModule(name)))
+    {
+      MSink::Smear::Par smearPropPar;
+      smearPropPar.q = prop;
+      smearPropPar.sink = sink;
+      application.createModule<MSink::Smear>(name, smearPropPar);
+    }
 }
 
 void makeZSequentialSource(Application &application, const std::string q,
@@ -109,19 +98,22 @@ void makeZSequentialSource(Application &application, const std::string q,
                            const std::string mom, const std::string name,
                            const unsigned int mu = 3, const Current curr_type = Current::Vector)
 {
-    std::string q5d = q + "_5d";
-    MSource::ZSeqConserved::Par zSeqSrcPar;
-    zSeqSrcPar.q = q5d;
-    zSeqSrcPar.source = source;
-    zSeqSrcPar.action = action;
-    zSeqSrcPar.tA = tJ;
-    zSeqSrcPar.tB = tJ;
-    zSeqSrcPar.curr_type = curr_type;
-    zSeqSrcPar.mu_min = mu;
-    zSeqSrcPar.mu_max = mu;
-    zSeqSrcPar.mom = mom;
-    zSeqSrcPar.photon = "";
-    application.createModule<MSource::ZSeqConserved>(name, zSeqSrcPar);
+    if (!(VirtualMachine::getInstance().hasModule(name)))
+    {
+      std::string q5d = q + "_5d";
+      MSource::ZSeqConserved::Par zSeqSrcPar;
+      zSeqSrcPar.q = q5d;
+      zSeqSrcPar.source = source;
+      zSeqSrcPar.action = action;
+      zSeqSrcPar.tA = tJ;
+      zSeqSrcPar.tB = tJ;
+      zSeqSrcPar.curr_type = curr_type;
+      zSeqSrcPar.mu_min = mu;
+      zSeqSrcPar.mu_max = mu;
+      zSeqSrcPar.mom = mom;
+      zSeqSrcPar.photon = "";
+      application.createModule<MSource::ZSeqConserved>(name, zSeqSrcPar);
+    }
 }
 
 void makeSequentialSource(Application &application, const std::string q,
@@ -130,19 +122,22 @@ void makeSequentialSource(Application &application, const std::string q,
                            const std::string mom, const std::string name,
                            const unsigned int mu = 3, const Current curr_type = Current::Vector)
 {
-    std::string q5d = q + "_5d";
-    MSource::SeqConserved::Par seqSrcPar;
-    seqSrcPar.q = q5d;
-    seqSrcPar.source = source;
-    seqSrcPar.action = action;
-    seqSrcPar.tA = tJ;
-    seqSrcPar.tB = tJ;
-    seqSrcPar.curr_type = curr_type;
-    seqSrcPar.mu_min = mu;
-    seqSrcPar.mu_max = mu;
-    seqSrcPar.mom = mom;
-    seqSrcPar.photon = "";
-    application.createModule<MSource::SeqConserved>(name, seqSrcPar);
+    if (!(VirtualMachine::getInstance().hasModule(name)))
+    {
+      std::string q5d = q + "_5d";
+      MSource::SeqConserved::Par seqSrcPar;
+      seqSrcPar.q = q5d;
+      seqSrcPar.source = source;
+      seqSrcPar.action = action;
+      seqSrcPar.tA = tJ;
+      seqSrcPar.tB = tJ;
+      seqSrcPar.curr_type = curr_type;
+      seqSrcPar.mu_min = mu;
+      seqSrcPar.mu_max = mu;
+      seqSrcPar.mom = mom;
+      seqSrcPar.photon = "";
+      application.createModule<MSource::SeqConserved>(name, seqSrcPar);
+    }
 }
 
 void makeSeqProp(Application &application, const std::string solver,
@@ -232,10 +227,12 @@ void makeLoops(Application &application, const std::string prop,
     }
 }
 
+template <typename E>
 void makeMeson(Application &application, const std::string prop1,
                const std::string prop2, const std::string sink,
                const std::string gammas, const std::string output,
-               const std::string name)
+               const std::string name, const E entry,
+               const std::string entryName)
 {
     MContraction::Meson::Par mesonPar;
     mesonPar.q1 = prop1;
@@ -244,12 +241,15 @@ void makeMeson(Application &application, const std::string prop1,
     mesonPar.gammas = gammas;
     mesonPar.output = output;
     application.createModule<MContraction::Meson>(name, mesonPar);
+    application.setResultMetadata(name, entryName, entry);
 }
 
+template <typename E>
 void makeGamma3pt(Application &application, const std::string prop1,
                   const std::string prop2, const std::string prop3,
                   const unsigned int tSnk, const std::string gamma,
-                  const std::string output, const std::string name)
+                  const std::string output, const std::string name,
+                  const E entry, const std::string entryName)
 {
     MContraction::Gamma3pt::Par gamma3ptPar;
     gamma3ptPar.q1 = prop1;
@@ -259,13 +259,16 @@ void makeGamma3pt(Application &application, const std::string prop1,
     gamma3ptPar.gamma = gamma;
     gamma3ptPar.output = output;
     application.createModule<MContraction::Gamma3pt>(name, gamma3ptPar);
+    application.setResultMetadata(name, entryName, entry);
 }
 
+template <typename E>
 void makeWeakNonEye(Application &application, const std::string qLeft,
                     const std::string qBarLeft, const std::string qRight,
                     const std::string qBarRight, const Gamma::Algebra gammaIn,
                     const Gamma::Algebra gammaOut, const std::string output,
-                    const std::string name)
+                    const std::string name, const E entry,
+                    const std::string entryName)
 {
     MContraction::WeakNonEye3pt::Par weakNonEye3ptPar;
     weakNonEye3ptPar.qLeft = qLeft;
@@ -276,13 +279,16 @@ void makeWeakNonEye(Application &application, const std::string qLeft,
     weakNonEye3ptPar.gammaOut = gammaOut;
     weakNonEye3ptPar.output = output;
     application.createModule<MContraction::WeakNonEye3pt>(name, weakNonEye3ptPar);
+    application.setResultMetadata(name, entryName, entry);
 }
 
+template <typename E>
 void makeWeakEye(Application &application, const std::string qBarLeft,
                  const std::string qBarRight, const std::string qSpectator,
                  const std::string loop, const Gamma::Algebra gammaIn,
                  const Gamma::Algebra gammaOut, const unsigned int tOut,
-                 const std::string output, const std::string name)
+                 const std::string output, const std::string name,
+                 const E entry, const std::string entryName)
 {
     MContraction::WeakEye3pt::Par weakEye3ptPar;
     weakEye3ptPar.qBarLeft = qBarLeft;
@@ -294,17 +300,44 @@ void makeWeakEye(Application &application, const std::string qBarLeft,
     weakEye3ptPar.tOut = tOut;
     weakEye3ptPar.output = output;
     application.createModule<MContraction::WeakEye3pt>(name, weakEye3ptPar);
+    application.setResultMetadata(name, entryName, entry);
 }
 
 void makeDiscLoop(Application &application, const std::string q_loop,
                   const std::string output, const std::string name,
-                  const Gamma::Algebra gamma = Gamma::Algebra::Identity)
+                  const BaseEntry baseEntry, const std::string eQ1,
+                  const int eNoise, 
+                  std::string gammas = "all")
 {
     MContraction::DiscLoop::Par discLoopPar;
     discLoopPar.q_loop = q_loop;
-    discLoopPar.gamma = gamma;
+    discLoopPar.gammas = gammas;
     discLoopPar.output = output;
+
+    DiscLoopEntry dlEntry;
+    dlEntry.q1 = eQ1;
+    dlEntry.noise = eNoise;
+    auto mergedEntry(mergeSqlEntries(baseEntry, dlEntry));
+
     application.createModule<MContraction::DiscLoop>(name, discLoopPar);
+    application.setResultMetadata(name, "disc", mergedEntry);
 }
 
-#endif // Production_Utils_hpp_
+template <typename E>
+void makeRareKaonNeutralDisc(Application &application, const std::string q1,
+                             const std::string q2, const std::string q3,
+                             const std::string q4,
+                             const std::string output, const std::string name,
+                             const E entry, const std::string entryName)
+{
+    MContraction::RareKaonNeutralDisc::Par RareKaonNeutralDiscPar;
+    RareKaonNeutralDiscPar.q1 = q1;
+    RareKaonNeutralDiscPar.q2 = q2;
+    RareKaonNeutralDiscPar.q3 = q3;
+    RareKaonNeutralDiscPar.q4 = q4;
+    RareKaonNeutralDiscPar.output = output;
+    application.createModule<MContraction::RareKaonNeutralDisc>(name, RareKaonNeutralDiscPar);
+    application.setResultMetadata(name, entryName, entry);
+}
+
+#endif // Production_ApplicationUtils_hpp_
