@@ -303,24 +303,18 @@ void makeWeakEye(Application &application, const std::string qBarLeft,
     application.setResultMetadata(name, entryName, entry);
 }
 
+template <typename E>
 void makeDiscLoop(Application &application, const std::string q_loop,
                   const std::string output, const std::string name,
-                  const BaseEntry baseEntry, const std::string eQ1,
-                  const int eNoise, 
+                  const E entry, const std::string entryName, 
                   std::string gammas = "all")
 {
     MContraction::DiscLoop::Par discLoopPar;
     discLoopPar.q_loop = q_loop;
     discLoopPar.gammas = gammas;
     discLoopPar.output = output;
-
-    DiscLoopEntry dlEntry;
-    dlEntry.q1 = eQ1;
-    dlEntry.noise = eNoise;
-    auto mergedEntry(mergeSqlEntries(baseEntry, dlEntry));
-
     application.createModule<MContraction::DiscLoop>(name, discLoopPar);
-    application.setResultMetadata(name, "disc", mergedEntry);
+    application.setResultMetadata(name, entryName, entry);
 }
 
 template <typename E>
