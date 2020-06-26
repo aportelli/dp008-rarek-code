@@ -394,7 +394,7 @@ int main(int argc, char *argv[])
     {
         std::string loop = sparseLoops[i][j];
         std::string sparseName = flavour[i] + "_" + std::to_string(j);
-        std::string resDiscLoop = resultStem + "/testMomdisc/disc_"
+        std::string resDiscLoop = resultStem + "/disc/disc_"
                                   + sDiscMom[m] + "_" + sparseName;
         std::string discLoop = "disc_" + sDiscMom[m] + "_" + sparseName;
         auto dlVcEntry = makeDiscLoopEntry(vDiscMom[m], flavour[i], j);
@@ -826,7 +826,7 @@ int main(int argc, char *argv[])
             {
                 std::string loop = sparseLoops[i][j];
                 std::string sparseName = flavour[i] + "_" + std::to_string(j);
-                std::string resDisc0Loop = resultStem + "/test/4pt/testdisc0_VC" + smu
+                std::string resDisc0Loop = resultStem + "/4pt/testdisc0_VC" + smu
                                            + "_" + sparseName + "mom" + sPMom + "_tK_" + timeStamp;
                 std::string disc0Loop = "disc0_VC" + smu + "_" + flavour[i]
                                         + "_" + std::to_string(tj) + "_" + std::to_string(j);
