@@ -305,13 +305,14 @@ void makeWeakEye(Application &application, const std::string qBarLeft,
 
 template <typename E>
 void makeDiscLoop(Application &application, const std::string q_loop,
-                  const std::string output, const std::string name,
-                  const E entry, const std::string entryName, 
-                  std::string gammas = "all")
+                  const std::vector<std::string> mom, const std::string output,
+                  const std::string name, const E entry,
+                  const std::string entryName, std::string gammas = "all")
 {
     MContraction::DiscLoop::Par discLoopPar;
     discLoopPar.q_loop = q_loop;
     discLoopPar.gammas = gammas;
+    discLoopPar.mom    = mom;
     discLoopPar.output = output;
     application.createModule<MContraction::DiscLoop>(name, discLoopPar);
     application.setResultMetadata(name, entryName, entry);

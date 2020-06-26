@@ -19,6 +19,26 @@ std::string sanitizeMom(std::string mom)
     return sMom;
 }
 
+std::vector<std::vector<std::string>> makeDiscMom(std::string kMom, std::string pMom)
+{
+    std::vector<std::vector<std::string>> discMom;
+    std::vector<std::string> discKMom, discPMom;
+    std::string sKMom, sPMom;
+    std::vector<double> dKMom = strToVec<double>(kMom);
+    std::vector<double> dPMom = strToVec<double>(pMom);
+    int len = dKMom.size();
+    for (int i = 0; i < len; ++i)
+    {
+      int iKMom = static_cast<int>(dKMom[i]);
+      sKMom += std::to_string(iKMom) + " ";
+      int iPMom = static_cast<int>(dPMom[i]);
+      sPMom += std::to_string(iPMom) + " ";
+    }
+    discKMom.push_back(sKMom);    discPMom.push_back(sPMom);
+    discMom.push_back(discKMom);  discMom.push_back(discPMom);
+    return discMom;
+}
+
 std::string makeWallSourceName(const unsigned int tW, const std::string mom)
 {
     std::string wallSourceName = "wall_" + std::to_string(tW) + "_" + mom;
