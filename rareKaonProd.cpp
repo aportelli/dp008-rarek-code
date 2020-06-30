@@ -535,14 +535,14 @@ int main(int argc, char *argv[])
         auto pwKL3ptEntry = makeEntry3ptVC(vKMom, vQMom, vPMom, tk, tj, "kaon_l", "point");
         makeMeson(application, seqVcKLQmom, qWallksZeromom, sink2ptPmom,
                   twoPtGammas, PointWallMesonKVcLRes, PointWallMesonKVcL,
-                  pwKL3ptEntry, "Three_point_VC");
+                  pwKL3ptEntry, "Three_point_Vc");
         // Strange insetion: K->pi momentum
         std::string PointWallMesonKVcSRes = resultStem + "/3pt/VC" + smu + "/3ptKaon_PW_VC" + smu + "S_tK_" + timeStamp;
         std::string PointWallMesonKVcS = "PointWallMesonKVcS_" + stk;
         auto pwKS3ptEntry = makeEntry3ptVC(vKMom, vQMom, vPMom, tk, tj, "kaon_sbar", "point");
         makeMeson(application, qWallklZeromom, seqVcKSMqmom, sink2ptPmom,
                   twoPtGammas, PointWallMesonKVcSRes, PointWallMesonKVcS,
-                  pwKS3ptEntry, "Three_point_VC");
+                  pwKS3ptEntry, "Three_point_Vc");
 
         //////////////////////////////////////////////////
         // Kaon Meson Contractions: Wall-wall
@@ -567,14 +567,14 @@ int main(int argc, char *argv[])
         auto wwKL3ptEntry = makeEntry3ptVC(vKMom, vQMom, vPMom, tk, tj, "kaon_l", "wall");
         makeMeson(application, smearedqWallVcKLQmom, smearedqWallksZeromom, sink2ptPmom,
                   twoPtGammas, wallWallMesonKLRes, wallWallMesonKL,
-                  wwKL3ptEntry, "Three_point_VC");
+                  wwKL3ptEntry, "Three_point_Vc");
         // Strange instertion: K->pi momentum
         std::string wallWallMesonKSRes = resultStem + "/3pt/VC" + smu + "/3ptKaon_WW_VC" + smu + "S_tK_" + timeStamp;
         std::string wallWallMesonKS = "wallWallMesonKS_" + stk;
         auto wwKS3ptEntry = makeEntry3ptVC(vKMom, vQMom, vPMom, tk, tj, "kaon_sbar", "wall");
         makeMeson(application, smearedqWallklPmom, smearedqWallVcKSmQmom, sink2ptPmom,
                   twoPtGammas, wallWallMesonKSRes, wallWallMesonKS,
-                  wwKS3ptEntry, "Three_point_VC");
+                  wwKS3ptEntry, "Three_point_Vc");
 
         //////////////////////////////////////////////////
         // Pion Meson Contractions: Point-wall
@@ -599,14 +599,14 @@ int main(int argc, char *argv[])
         auto pwPL3ptEntry = makeEntry3ptVC(vKMom, vQMom, vPMom, tp, tj, "pion_l", "point");
         makeMeson(application, seqVcPLMqmom, qWallplbarPmom, sink2ptZeromom,
                   twoPtGammas, PointWallPiVcLRes, PointWallPiVcL,
-                  pwPL3ptEntry, "Three_point_VC");
+                  pwPL3ptEntry, "Three_point_Vc");
         // Lightbar insetion: K->pi momentum
         std::string PointWallPiVcLbarRes = resultStem + "/3pt/VC" + smu + "/3ptPion_PW_VC" + smu + "Lbar_tK_" + timeStamp;
         std::string PointWallPiVcLbar = "PointWallPiVcLbar_" + stk;
         auto pwPLbar3ptEntry = makeEntry3ptVC(vKMom, vQMom, vPMom, tp, tj, "pion_lbar", "point");
         makeMeson(application, qWallplZeromom, seqVcPLbarQmom, sink2ptZeromom,
                   twoPtGammas, PointWallPiVcLbarRes, PointWallPiVcLbar,
-                  pwPLbar3ptEntry, "Three_point_VC");
+                  pwPLbar3ptEntry, "Three_point_Vc");
 
         //////////////////////////////////////////////////
         // Pion Meson Contractions: Wall-wall
@@ -631,14 +631,14 @@ int main(int argc, char *argv[])
         auto wwPL3ptEntry = makeEntry3ptVC(vKMom, vQMom, vPMom, tp, tj, "pion_l", "wall");
         makeMeson(application, smearedqWallVcPLmQmom, smearedqWallplPmom, sink2ptZeromom,
                   twoPtGammas, wallWallmesonPiLRes, wallWallmesonPiL,
-                  wwPL3ptEntry, "Three_point_VC");
+                  wwPL3ptEntry, "Three_point_Vc");
         // Lightbar insertion: K->pi momentum
         std::string wallWallmesonPiLbarRes = resultStem + "/3pt/VC" + smu + "/3ptPion_WW_VC" + smu + "lbar_tK_" + timeStamp;
         std::string wallWallmesonPiLbar = "wallWallmesonPiLbar_" + stk;
         auto wwPLbar3ptEntry = makeEntry3ptVC(vKMom, vQMom, vPMom, tp, tj, "pion_lbar", "wall");
         makeMeson(application, smearedqWallplZeromom, smearedqWallVcPLbarQmom, sink2ptZeromom,
                   twoPtGammas, wallWallmesonPiLbarRes, wallWallmesonPiLbar,
-                  wwPLbar3ptEntry, "Three_point_VC");
+                  wwPLbar3ptEntry, "Three_point_Vc");
 
         //////////////////////////////////////////////////
         // Gamma 3pt Contractions
@@ -826,7 +826,7 @@ int main(int argc, char *argv[])
             {
                 std::string loop = sparseLoops[i][j];
                 std::string sparseName = flavour[i] + "_" + std::to_string(j);
-                std::string resDisc0Loop = resultStem + "/4pt/testdisc0_VC" + smu
+                std::string resDisc0Loop = resultStem + "/4pt/disc0_VC" + smu
                                            + "_" + sparseName + "mom" + sPMom + "_tK_" + timeStamp;
                 std::string disc0Loop = "disc0_VC" + smu + "_" + flavour[i]
                                         + "_" + std::to_string(tj) + "_" + std::to_string(j);
