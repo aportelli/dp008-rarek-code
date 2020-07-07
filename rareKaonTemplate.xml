@@ -44,8 +44,8 @@
         <epackSize>2000</epackSize>
         <epackLs>10</epackLs>
         <epackMultiFile>true</epackMultiFile>
-        <resultStem>./result/production/k000_p@pmom@/</resultStem>
-        <xmlFileName>./hadronsxml/production/rarekaon_000_@pmom@_tK@dtK@_tpi@dtP@_tJ@dtJ@_witheye_@ti@_@ts@_@tf@.xml</xmlFileName>
+        <resultStem>./result/k000_p@pmom@/</resultStem>
+        <xmlFileName>./hadronsxml/rarekaon_000_@pmom@_tK@dtK@_tpi@dtP@_tJ@dtJ@_witheye_@ti@_@ts@_@tf@.xml</xmlFileName>
     </ioPar>
     <zMobiusPar>
         <Ls>10</Ls>
