@@ -11,9 +11,9 @@
     <dbPar>
         <applicationDb>rareK@pmom@App.db</applicationDb>
         <resultDb>rareKaonResults.db</resultDb>
-        <restoreSchedule>false</restoreSchedule>
-        <restoreModules>false</restoreModules>
-        <restoreMemoryProfile>false</restoreMemoryProfile>
+        <restoreSchedule>@resSched@</restoreSchedule>
+        <restoreModules>@resMod@</restoreModules>
+        <restoreMemoryProfile>@resMem@</restoreMemoryProfile>
         <makeStatDb>true</makeStatDb>
     </dbPar>
     <timePar>
@@ -79,7 +79,7 @@
     </charm2ActionPar>
     <charm3ActionPar>
         <mass>0.30</mass>
-        <residual>1e-08</residual>
+        <residual>1e-14</residual>
     </charm3ActionPar>
     <strangeActionPar>
         <mass>0.0362</mass>
