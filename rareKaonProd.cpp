@@ -362,13 +362,13 @@ int main(int argc, char *argv[])
     std::string sparseNoise = "sparseNoise";
     std::string sparseNoises = "sparseNoises";
     std::string solver, sparseProp, sparseProps;
-    unsigned int nsrc = 1, nsparse = 2, nds = pow(nsparse, 4);
-    makeZ2SparseSources(application, nsrc, nsparse, sparseNoises);
+    unsigned int nsrc = 16, nsparse = 16;
+    makeZ2CheckerboardSources(application, nsrc, nsparse, sparseNoises);
     unpackProps(application, sparseNoises, sparseNoise);
 
     std::vector<std::vector<std::string>> sparseLoops, seqSparseLoops;
-    sparseLoops.resize(flavour.size(), std::vector<std::string>(nds));
-    seqSparseLoops.resize(flavour.size(), std::vector<std::string>(nds));
+    sparseLoops.resize(flavour.size(), std::vector<std::string>(nsparse));
+    seqSparseLoops.resize(flavour.size(), std::vector<std::string>(nsparse));
     for (unsigned int i = 1; i < flavour.size(); ++i)
     {
         solver = "mcg_" + flavour[i];
