@@ -29,6 +29,12 @@ AC_CHECK_PROG([HADCONF],[hadrons-config],[yes])
 if test x"$HADCONF" != x"yes" ; then
     AC_MSG_ERROR([hadrons-config not found])
 fi
+AC_ARG_WITH([grid],
+    [AS_HELP_STRING([--with-grid=<prefix>],
+    [try this for a non-standard install prefix of Grid])],
+    [PATH="$with_grid/bin$PATH_SEPARATOR$PATH"]
+    [CXXFLAGS="$CXXFLAGS -I$with_grid/include"]
+    [LDFLAGS="$LDFLAGS -L$with_grid/lib"])
 CXXFLAGS="$CXXFLAGS `hadrons-config --cxxflags`"
 LDFLAGS="$LDFLAGS `hadrons-config --ldflags`"
 CXXFLAGS="$AM_CXXFLAGS $CXXFLAGS"
