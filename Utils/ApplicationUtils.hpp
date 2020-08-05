@@ -160,15 +160,15 @@ void makeSeqZProp(Application &application, const std::string solver,
     makeZGaugeProp(application, solver, srcName, seqPropName);
 }
 
-void makeZCheckerboardSpinColorDiagonal(Application &application, const unsigned int nsrc,
-                                        const unsigned int nsparse, const std::string name)
+void makeZSparseSpinColorDiagonal(Application &application, const unsigned int nsrc,
+                                  const unsigned int nsparse, const std::string name)
 {
     if (!(VirtualMachine::getInstance().hasModule(name)))
     {
-        MNoise::CheckerboardSpinColorDiagonal::Par sparsePar;
+        MNoise::SparseSpinColorDiagonal::Par sparsePar;
         sparsePar.nsrc = nsrc;
         sparsePar.nsparse = nsparse;
-        application.createModule<MNoise::CheckerboardSpinColorDiagonal>(name, sparsePar);
+        application.createModule<MNoise::SparseSpinColorDiagonal>(name, sparsePar);
     }
 }
 
@@ -183,11 +183,11 @@ void makeZ2Diluted(Application &application, const std::string noise,
     }
 }
 
-void makeZ2CheckerboardSources(Application &application, const unsigned int nsrc,
-                               const unsigned int nsparse, const std::string name)
+void makeZ2SparseSources(Application &application, const unsigned int nsrc,
+                         const unsigned int nsparse, const std::string name)
 {
     std::string scdName = name + "_spinColordiagonal";
-    makeZCheckerboardSpinColorDiagonal(application, nsrc, nsparse, scdName);
+    makeZSparseSpinColorDiagonal(application, nsrc, nsparse, scdName);
     makeZ2Diluted(application, scdName, name);
 }
 
