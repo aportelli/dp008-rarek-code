@@ -38,6 +38,20 @@ void makeZGaugeProp(Application &application, const std::string solver,
     }
 }
 
+void makeZGaugeProps(Application &application, const std::string solver,
+                    const std::vector<std::string> sources, const std::string name,
+                    std::vector<std::string> &props)
+{
+    std::string propName, srcName;
+    for (unsigned int i = 0; i < props.size(); ++i)
+    {
+      propName = name + "_" + std::to_string(i);
+      srcName  = sources[i];
+      makeZGaugeProp(application, solver, srcName, propName);
+      props[i] = propName;
+    }
+}
+
 void makeGaugeProp(Application &application, const std::string solver,
                    const std::string source, const std::string name)
 {
@@ -160,6 +174,24 @@ void makeSeqZProp(Application &application, const std::string solver,
     makeZGaugeProp(application, solver, srcName, seqPropName);
 }
 
+void makeSeqZProps(Application &application, const std::string solver,
+                   const std::string action, const unsigned int tJ,
+                   const std::string mom, const std::vector<std::string> props,
+                   const std::vector<std::string> sources, const std::string name,
+                   std::vector<std::string> &seqProps)
+{
+    std::string propName, srcName, seqPropName;
+    for (unsigned int i = 0; i < props.size(); ++i)
+    {
+      seqPropName = name + "_" + std::to_string(i);
+      propName = props[i];
+      srcName  = sources[i];
+      makeSeqZProp(application, solver, action, tJ, mom, propName,
+                   srcName, seqPropName);
+      seqProps[i] = seqPropName;
+    }
+}
+
 void makeZSparseSpinColorDiagonal(Application &application, const unsigned int nsrc,
                                   const unsigned int nsparse, const std::string name)
 {
@@ -191,15 +223,26 @@ void makeZ2SparseSources(Application &application, const unsigned int nsrc,
     makeZ2Diluted(application, scdName, name);
 }
 
-void unpackProps(Application &application, const std::string input,
-                 const std::string name)
+void makePropagatorVectorUnpack(Application &application, const std::string input,
+                                const unsigned int size, const std::string name)
 {
     if (!(VirtualMachine::getInstance().hasModule(name)))
     {
         MUtilities::PropagatorVectorUnpack::Par unpackPar;
         unpackPar.input = input;
-        unpackPar.size = 16;
+        unpackPar.size = size;
         application.createModule<MUtilities::PropagatorVectorUnpack>(name, unpackPar);
+    }
+}
+
+void unpackProps(Application &application, const std::string input,
+                 const unsigned int size, const std::string name,
+                 std::vector<std::string> &unpackedProps)
+{
+    makePropagatorVectorUnpack(application, input, size, name);
+    for (unsigned int i = 0; i < unpackedProps.size(); ++i)
+    {
+      unpackedProps[i] = name + "_"  + std::to_string(i);
     }
 }
 
@@ -212,17 +255,14 @@ void makeLoop(Application &application, const std::string q,
     application.createModule<MContraction::Loop>(name, loopPar);
 }
 
-void makeLoops(Application &application, const std::string prop,
-               const std::string src, std::vector<std::string> &loops)
+void makeLoops(Application &application, const std::vector<std::string> props,
+               const std::vector<std::string> srcs, std::vector<std::string> &loops)
 {
-    std::vector<std::string> loopNames;
-    std::string loopName, propName, srcName;
-    for (int i = 0; i < loops.size(); ++i)
+    std::string loopName;
+    for (unsigned int i = 0; i < loops.size(); ++i)
     {
-      propName = prop + "_" + std::to_string(i);
-      srcName  = src + "_" + std::to_string(i);
-      loopName = propName + "_loop";
-      makeLoop(application, propName, srcName, loopName);
+      loopName = props[i] + "_loop";
+      makeLoop(application, props[i], srcs[i], loopName);
       loops[i] = loopName;
     }
 }

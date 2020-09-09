@@ -16,6 +16,16 @@ namespace RareKaonInputs
                                         std::string, runId);
     };
 
+    class GeneticPar : Serializable
+    {
+    public:
+        GRID_SERIALIZABLE_CLASS_MEMBERS(GeneticPar,
+                                        unsigned int, popSize,
+                                        unsigned int, maxGen,
+                                        unsigned int, maxCstGen,
+                                        double,       mutationRate);
+    };
+
     class TrajRange : Serializable
     {
     public:
@@ -34,7 +44,8 @@ namespace RareKaonInputs
                                         bool,        restoreSchedule,
                                         bool,        restoreModules,
                                         bool,        restoreMemoryProfile,
-                                        bool,        makeStatDb);
+                                        bool,        makeStatDb,
+                                        bool,        populateResultDb);
     };
 
     class TimePar : Serializable
@@ -70,6 +81,13 @@ namespace RareKaonInputs
                                         std::string   , threePtGammaInsertions);
     };
 
+    class NoisePar : Serializable
+    {
+    public:
+        GRID_SERIALIZABLE_CLASS_MEMBERS(NoisePar,
+                                        unsigned int, nHits);
+    };
+
     class IOPar : Serializable
     {
     public:
@@ -99,7 +117,8 @@ namespace RareKaonInputs
     public:
         GRID_SERIALIZABLE_CLASS_MEMBERS(LightActionPar,
                                         double, mass,
-                                        double, residual);
+                                        double, residual,
+                                        double, loopResidual);
     };
 
     class CharmActionPar : Serializable
@@ -132,6 +151,7 @@ struct RareKaonPar
     RareKaonInputs::ZMobiusPar       zMobiusPar;
     RareKaonInputs::TrajRange        trajRange;
     RareKaonInputs::GammaPar         gammaPar;
+    RareKaonInputs::NoisePar         noisePar;
     RareKaonInputs::TimePar          timePar;
     RareKaonInputs::RunPar           runPar;
     RareKaonInputs::MomPar           momPar;
@@ -164,6 +184,7 @@ int main(int argc, char *argv[])
     read(reader,       "zMobiusPar",       par.zMobiusPar);
     read(reader,        "trajRange",        par.trajRange);
     read(reader,         "gammaPar",         par.gammaPar);
+    read(reader,         "noisePar",         par.noisePar);
     read(reader,          "timePar",          par.timePar);
     read(reader,           "runPar",           par.runPar);
     read(reader,           "momPar",           par.momPar);
@@ -174,6 +195,8 @@ int main(int argc, char *argv[])
     unsigned int dtK = par.timePar.dtK;
     unsigned int dtJ = par.timePar.dtJ;
     unsigned int dtP = par.timePar.dtP;
+
+    unsigned int nHits  = par.noisePar.nHits;
 
     std::string kmom  = par.momPar.kmom;
     std::string pmom  = par.momPar.pmom;
@@ -190,13 +213,18 @@ int main(int argc, char *argv[])
     std::string resultStem = par.ioPar.resultStem;
 
     // initialization //////////////////////////////////////////////////////////
-    Grid_init(&argc, &argv);
-    HadronsLogError.Active(GridLogError.isActive());
-    HadronsLogWarning.Active(GridLogWarning.isActive());
-    HadronsLogMessage.Active(GridLogMessage.isActive());
-    HadronsLogIterative.Active(GridLogIterative.isActive());
-    HadronsLogDebug.Active(GridLogDebug.isActive());
-    LOG(Message) << "Grid initialized" << std::endl;
+    bool populateResultDb = par.dbPar.populateResultDb;
+
+    if(!populateResultDb)
+    {
+        Grid_init(&argc, &argv);
+        HadronsLogError.Active(GridLogError.isActive());
+        HadronsLogWarning.Active(GridLogWarning.isActive());
+        HadronsLogMessage.Active(GridLogMessage.isActive());
+        HadronsLogIterative.Active(GridLogIterative.isActive());
+        HadronsLogDebug.Active(GridLogDebug.isActive());
+        LOG(Message) << "Grid initialized" << std::endl;
+    }
 
     // global parameters
     Application application;
@@ -211,6 +239,10 @@ int main(int argc, char *argv[])
     globalPar.database.restoreModules       = par.dbPar.restoreModules;
     globalPar.database.restoreMemoryProfile = par.dbPar.restoreMemoryProfile;
     globalPar.database.makeStatDb           = par.dbPar.makeStatDb;
+    globalPar.genetic.popSize               = 10;
+    globalPar.genetic.maxGen                = 500;
+    globalPar.genetic.maxCstGen             = 40;
+    globalPar.genetic.mutationRate          = 0.1;
     application.setPar(globalPar);
 
     // action parameters ///////////////////////////////////////////////////////////////
@@ -226,6 +258,12 @@ int main(int argc, char *argv[])
                                     par.charm1ActionPar.residual,
                                     par.charm2ActionPar.residual,
                                     par.charm3ActionPar.residual};
+
+    std::vector<double> loopResidual = {par.strangeActionPar.residual,
+                                        par.lightActionPar.loopResidual,
+                                        par.charm1ActionPar.residual,
+                                        par.charm2ActionPar.residual,
+                                        par.charm3ActionPar.residual};
     std::vector<unsigned int> Ls = {par.strangeActionPar.Ls,
                                     par.zMobiusPar.Ls};
     std::vector<double> M5 = {par.strangeActionPar.M5,
@@ -318,7 +356,7 @@ int main(int argc, char *argv[])
     application.createModule<MSolver::MixedPrecisionRBPrecCG>("mcg_" + flavour[0], solverParStrange);
 
 
-    // Zmobius action: light, charm1, charm2, charm3
+    // Zmobius action for loops: light, charm1, charm2, charm3
     for (unsigned int i = 1; i < flavour.size(); ++i)
     {
         MAction::ZMobiusDWF::Par ZMobActionPar;
@@ -350,34 +388,63 @@ int main(int argc, char *argv[])
         MSolver::ZMixedPrecisionRBPrecCG::Par ZMobSolverPar;
         ZMobSolverPar.innerAction = "dwff_" + flavour[i];
         ZMobSolverPar.outerAction = "dwf_" + flavour[i];
-        ZMobSolverPar.residual = residual[i];
+        ZMobSolverPar.residual = loopResidual[i];
         ZMobSolverPar.maxInnerIteration = 30000;
         ZMobSolverPar.maxOuterIteration = 100;
         ZMobSolverPar.eigenPack = epack[i];
-        application.createModule<MSolver::ZMixedPrecisionRBPrecCG>("mcg_" + flavour[i], ZMobSolverPar);
+        application.createModule<MSolver::ZMixedPrecisionRBPrecCG>("loopMcg_" + flavour[i], ZMobSolverPar);
 
     }
 
+    // Solver (non-loop): light
+    MSolver::ZMixedPrecisionRBPrecCG::Par ZMobSolverPar;
+    ZMobSolverPar.innerAction = "dwff_" + flavour[1];
+    ZMobSolverPar.outerAction = "dwf_" + flavour[1];
+    ZMobSolverPar.residual = residual[1];
+    ZMobSolverPar.maxInnerIteration = 30000;
+    ZMobSolverPar.maxOuterIteration = 100;
+    ZMobSolverPar.eigenPack = epack[1];
+    application.createModule<MSolver::ZMixedPrecisionRBPrecCG>("mcg_" + flavour[1], ZMobSolverPar);
+
     // Sparse Noise Sources
-    std::string sparseNoise = "sparseNoise";
-    std::string sparseNoises = "sparseNoises";
-    std::string solver, sparseProp, sparseProps;
-    unsigned int nsrc = 1, nsparse = 2, nds = pow(nsparse, 4);
-    makeZ2SparseSources(application, nsrc, nsparse, sparseNoises);
-    unpackProps(application, sparseNoises, sparseNoise);
-
-    std::vector<std::vector<std::string>> sparseLoops, seqSparseLoops;
-    sparseLoops.resize(flavour.size(), std::vector<std::string>(nds));
-    seqSparseLoops.resize(flavour.size(), std::vector<std::string>(nds));
-    for (unsigned int i = 1; i < flavour.size(); ++i)
+    unsigned int nsrc = 1, nsparse = 2, nds = nsrc*pow(nsparse, 4);
+    std::vector<std::vector<std::string>> unpackedNoises;
+    std::vector<std::vector<std::vector<std::string>>> sparseProps, seqSparseProps;
+    std::vector<std::vector<std::vector<std::string>>> sparseLoops, seqSparseLoops;
+    unpackedNoises.resize(nHits, std::vector<std::string>(nds));
+    sparseProps.resize(nHits);
+    seqSparseProps.resize(nHits);
+    sparseLoops.resize(nHits);
+    seqSparseLoops.resize(nHits);
+    for (unsigned int h = 0; h < nHits; ++h)
     {
-        solver = "mcg_" + flavour[i];
-        sparseProps = "sparseProps_" + flavour[i];
-        sparseProp = "sparseProp_" + flavour[i];
+        std::string sparseNoise, sparseNoises;
+        if (h == 0)
+        {
+            sparseNoise = "sparseNoise";
+            sparseNoises = "sparseNoises";}
+        else
+        {
+            sparseNoise = "sparseNoise_" + std::to_string(h);
+            sparseNoises = "sparseNoises_" + std::to_string(h);
+        }
+        
+        makeZ2SparseSources(application, nsrc, nsparse, sparseNoises);
+        unpackProps(application, sparseNoises, nds, sparseNoise, unpackedNoises[h]);
 
-        makeZGaugeProp(application, solver, sparseNoises, sparseProps);
-        unpackProps(application, sparseProps, sparseProp);
-        makeLoops(application, sparseProp, sparseNoise, sparseLoops[i]);
+        sparseProps[h].resize(flavour.size(), std::vector<std::string>(nds));
+        seqSparseProps[h].resize(flavour.size(), std::vector<std::string>(nds));
+        sparseLoops[h].resize(flavour.size(), std::vector<std::string>(nds));
+        seqSparseLoops[h].resize(flavour.size(), std::vector<std::string>(nds));
+
+        for (unsigned int i = 1; i < flavour.size(); ++i)
+        {
+            std::string solver = "loopMcg_" + flavour[i];
+            std::string sparsePropName = "sparseProps_" + std::to_string(h) + "_" + flavour[i];
+
+            makeZGaugeProps(application, solver, unpackedNoises[h], sparsePropName, sparseProps[h][i]);
+            makeLoops(application, sparseProps[h][i], unpackedNoises[h], sparseLoops[h][i]);
+        }
     }
 
     //////////////////////////////////////////////////
@@ -388,16 +455,17 @@ int main(int argc, char *argv[])
     std::vector<std::string> sDiscMom;
     vDiscMom.push_back(vKMom); vDiscMom.push_back(vPMom);
     sDiscMom.push_back(sKMom); sDiscMom.push_back(sPMom);
+    for (unsigned int h = 0; h < nHits; ++h)
     for (unsigned int i = 1; i < flavour.size(); ++i)
-    for (unsigned int j = 0; j < sparseLoops[i].size(); ++j)
+    for (unsigned int j = 0; j < sparseLoops[h][i].size(); ++j)
     for (unsigned int m = 0; m < discMom.size(); ++m)
     {
-        std::string loop = sparseLoops[i][j];
-        std::string sparseName = flavour[i] + "_" + std::to_string(j);
+        std::string loop = sparseLoops[h][i][j];
+        std::string sparseName = flavour[i] + "_" + std::to_string(h) + "_" + std::to_string(j);
         std::string resDiscLoop = resultStem + "/disc/disc_"
                                   + sDiscMom[m] + "_" + sparseName;
         std::string discLoop = "disc_" + sDiscMom[m] + "_" + sparseName;
-        auto dlVcEntry = makeDiscLoopEntry(vDiscMom[m], flavour[i], j);
+        auto dlVcEntry = makeDiscLoopEntry(vDiscMom[m], flavour[i], h, j);
         makeDiscLoop(application, loop, discMom[m], resDiscLoop, discLoop,
                      dlVcEntry, "Disconnected");
     }
@@ -687,14 +755,14 @@ int main(int argc, char *argv[])
         // Kaon momentum
         std::string resWHNE3ptKmom = resultStem + "/3pt/HW/3pt_HW_Non_Eye_mom" + sKMom +"_tK_" + timeStamp;
         std::string WHNE3ptKmom = "WHNE_3pt_Kmom" + stk;
-        auto wneK3ptEntry = makeEntry3ptHw(tk, tp, "NE", vKMom, "", -1, true);
+        auto wneK3ptEntry = makeEntry3ptHw(tk, tp, "NE", vKMom, "", -1, -1, true, true);
         makeWeakNonEye(application, qWallklZeromom, qWallksZeromom, qWallplZeromom, qWallplZeromom,
                        gammaIn, gammaOut, resWHNE3ptKmom, WHNE3ptKmom,
                        wneK3ptEntry, "Three_point_Hw");
         // Pion momentum
         std::string resWHNE3ptPmom = resultStem + "/3pt/HW/3pt_HW_Non_Eye_mom" + sPMom + "_tK_" + timeStamp;
         std::string WHNE3ptPmom = "WHNE_3pt_Pmom_" + stk;
-        auto wneP3ptEntry = makeEntry3ptHw(tk, tp, "NE", vPMom, "", -1, true);
+        auto wneP3ptEntry = makeEntry3ptHw(tk, tp, "NE", vPMom, "", -1, -1, true, true);
         makeWeakNonEye(application, qWallklZeromom, qWallksPmom, qWallplZeromom, qWallplbarPmom,
                        gammaIn, gammaOut, resWHNE3ptPmom, WHNE3ptPmom,
                        wneP3ptEntry, "Three_point_Hw");
@@ -703,28 +771,28 @@ int main(int argc, char *argv[])
         // Kl
         std::string resWHNE4ptVcKL = resultStem + "/4pt/RK/4pt_Non_Eye_VC" + smu + "KL_tK_" + timeStamp;
         std::string WHNE4ptVcKL = "4pt_VC" + smu + "_KL_" + stk;
-        auto wneKl4ptEntry = makeEntry4pt(baseEntry, "NE_Kl", "", -1, true);
+        auto wneKl4ptEntry = makeEntry4pt(baseEntry, "NE_Kl", "", -1, -1, true, true);
         makeWeakNonEye(application, seqVcKLQmom, qWallksZeromom, qWallplZeromom, qWallplbarPmom,
                        gammaIn, gammaOut, resWHNE4ptVcKL, WHNE4ptVcKL,
                        wneKl4ptEntry, "Four_point");
         // Ksbar
         std::string resWHNE4ptVcKS = resultStem + "/4pt/RK/4pt_Non_Eye_VC" + smu + "KS_tK_" + timeStamp;
         std::string WHNE4ptVcKS = "4pt_VC" + smu + "_KS_" + stk;
-        auto wneKsbar4ptEntry = makeEntry4pt(baseEntry, "NE_Ksbar", "", -1, true);
+        auto wneKsbar4ptEntry = makeEntry4pt(baseEntry, "NE_Ksbar", "", -1, -1, true, true);
         makeWeakNonEye(application, qWallklZeromom, seqVcKSMqmom, qWallplZeromom, qWallplbarPmom,
                        gammaIn, gammaOut, resWHNE4ptVcKS, WHNE4ptVcKS,
                        wneKsbar4ptEntry, "Four_point");
         // Pil
         std::string resWHNE4ptVcPL = resultStem + "/4pt/RK/4pt_Non_Eye_VC" + smu + "PL_tK_" + timeStamp;
         std::string WHNE4ptVcPL = "4pt_VC" + smu + "_PL_" + stk;
-        auto wnePil4ptEntry = makeEntry4pt(baseEntry, "NE_Pil", "", -1, true);
+        auto wnePil4ptEntry = makeEntry4pt(baseEntry, "NE_Pil", "", -1, -1, true, true);
         makeWeakNonEye(application, qWallklZeromom, qWallksZeromom, seqVcPLMqmom, qWallplbarPmom,
                        gammaIn, gammaOut, resWHNE4ptVcPL, WHNE4ptVcPL,
                        wnePil4ptEntry, "Four_point");
         // Pilbar
         std::string resWHNE4ptVcPLbar = resultStem + "/4pt/RK/4pt_Non_Eye_VC" + smu + "PLbar_tK_" + timeStamp;
         std::string WHNE4ptVcPLbar = "4pt_VC" + smu + "_PLbar_" + stk;
-        auto wnePilbar4ptEntry = makeEntry4pt(baseEntry, "NE_Pilbar", "", -1, true);
+        auto wnePilbar4ptEntry = makeEntry4pt(baseEntry, "NE_Pilbar", "", -1, -1, true, true);
         makeWeakNonEye(application, qWallklZeromom, qWallksZeromom, qWallplZeromom, seqVcPLbarQmom,
                        gammaIn, gammaOut, resWHNE4ptVcPLbar, WHNE4ptVcPLbar,
                        wnePilbar4ptEntry, "Four_point");
@@ -732,18 +800,19 @@ int main(int argc, char *argv[])
         //////////////////////////////////////////////////
         // Weak Hamiltonian Eye Contractions
         //////////////////////////////////////////////////
+        for (unsigned int h = 0; h < nHits; ++h)
         for (unsigned int i = 1; i < flavour.size(); ++i)
         {
-            for (unsigned int j = 0; j < sparseLoops[i].size(); ++j)
+            for (unsigned int j = 0; j < sparseLoops[h][i].size(); ++j)
             {
-                std::string loop3pt = sparseLoops[i][j];
-                std::string sparseName = flavour[i] + "_" + std::to_string(j);
+                std::string loop3pt = sparseLoops[h][i][j];
+                std::string sparseName = flavour[i] + "_" + std::to_string(h) + "_" + std::to_string(j);
                 // 3pt Contractions
                 // Kaon momentum
                 std::string resWHE3ptKmom = resultStem + "/3pt/HW/3pt_HW_Eye_" + sparseName
                                             + "_mom" + sKMom +"_tK_" + timeStamp;
                 std::string WHE3ptKmom = "WHE_Kmom_" + sparseName + "_tk_" +  stk;
-                auto weK3ptEntry = makeEntry3ptHw(tk, tp, "E", vKMom, flavour[i], j);
+                auto weK3ptEntry = makeEntry3ptHw(tk, tp, "E", vKMom, flavour[i], h, j);
                 makeWeakEye(application, qWallksZeromom, qWallplZeromom, smearedqWallklZeromom, loop3pt,
                             gammaIn, gammaOut, tp, resWHE3ptKmom, WHE3ptKmom,
                             weK3ptEntry, "Three_point_Hw");
@@ -751,7 +820,7 @@ int main(int argc, char *argv[])
                 std::string resWHE3ptPmom = resultStem + "/3pt/HW/3pt_HW_Eye_" + sparseName
                                                + "_mom" + sPMom + "_tK_" + timeStamp;
                 std::string WHE3ptPmom = "WHE_Pmom_" + sparseName + "_tk_" +  stk;
-                auto weP3ptEntry = makeEntry3ptHw(tk, tp, "E", vPMom, flavour[i], j);
+                auto weP3ptEntry = makeEntry3ptHw(tk, tp, "E", vPMom, flavour[i], h, j);
                 makeWeakEye(application, qWallksPmom, qWallplbarPmom, smearedqWallklZeromom, loop3pt,
                             gammaIn, gammaOut, tp, resWHE3ptPmom, WHE3ptPmom,
                             weP3ptEntry, "Three_point_Hw");
@@ -761,7 +830,7 @@ int main(int argc, char *argv[])
                 std::string resWHE4ptVcspec = resultStem + "/4pt/RK/4pt_Eye_" + sparseName
                                                + "_VC" + smu + "_spec_tK_" + timeStamp;
                 std::string WHE4ptVcspec = "4pt_VC" + smu + "_Eye_" + sparseName + "_spec_" + stk;
-                auto weL4ptEntry = makeEntry4pt(baseEntry, "E_l", flavour[i], j);
+                auto weL4ptEntry = makeEntry4pt(baseEntry, "E_l", flavour[i], h, j);
                 makeWeakEye(application, qWallksZeromom, qWallplbarPmom, smearedqWallVcKspecQmom, loop3pt,
                             gammaIn, gammaOut, tp, resWHE4ptVcspec, WHE4ptVcspec,
                             weL4ptEntry, "Four_point");
@@ -770,7 +839,7 @@ int main(int argc, char *argv[])
                 std::string resWHE4ptVcKS = resultStem + "/4pt/RK/4pt_Eye_" + sparseName
                                                + "_VC" + smu + "_KS_tK_" + timeStamp;
                 std::string WHE4ptVcKS = "4pt_VC" + smu + "_Eye_" + sparseName + "_KS_" + stk;
-                auto weKS4ptEntry = makeEntry4pt(baseEntry, "E_Ksbar", flavour[i], j);
+                auto weKS4ptEntry = makeEntry4pt(baseEntry, "E_Ksbar", flavour[i], h, j);
                 makeWeakEye(application, seqVcKSMqmom, qWallplbarPmom, smearedqWallklZeromom, loop3pt,
                             gammaIn, gammaOut, tp, resWHE4ptVcKS, WHE4ptVcKS,
                             weKS4ptEntry, "Four_point");
@@ -779,7 +848,7 @@ int main(int argc, char *argv[])
                 std::string resWHE4ptVcKLbar = resultStem + "/4pt/RK/4pt_Eye_" + sparseName
                                                + "_VC" + smu + "_PLbar_tK_" + timeStamp;
                 std::string WHE4ptVcKLbar = "4pt_VC" + smu + "_Eye_" + sparseName + "_KLbar_" + stk;
-                auto wePiLbar4ptEntry = makeEntry4pt(baseEntry, "E_PiLbar", flavour[i], j);
+                auto wePiLbar4ptEntry = makeEntry4pt(baseEntry, "E_PiLbar", flavour[i], h, j);
                 makeWeakEye(application, qWallksZeromom, seqVcPLbarQmom, smearedqWallklZeromom, loop3pt,
                             gammaIn, gammaOut, tp, resWHE4ptVcKLbar, WHE4ptVcKLbar,
                             wePiLbar4ptEntry, "Four_point");
@@ -788,66 +857,72 @@ int main(int argc, char *argv[])
         //////////////////////////////////////////////////
         // Weak Hamiltonian Eye Loop Current Insertion
         //////////////////////////////////////////////////
+        for (unsigned int h = 0; h < nHits; ++h)
         for (unsigned int i = 1; i < flavour.size(); ++i)
         {
-            solver = "mcg_" + flavour[i];
+            std::string solver = "loopMcg_" + flavour[i];
             std::string action = "dwf_" + flavour[i];
-            std::string seqSparseProps = "seqSparseProps_" + flavour[i] + "_" + timeStamp;
-            std::string seqSparseProp = "seqSparseProp_" + flavour[i] + "_" + timeStamp;
+            std::string seqSparsePropName = "seqSparseProp_" + std::to_string(h)
+                                         + "_" + flavour[i] + "_" + timeStamp;
 
-            makeSeqZProp(application, solver, action, tj, qmom, sparseProps, sparseNoises, seqSparseProps);
-            unpackProps(application, seqSparseProps, seqSparseProp);
-            makeLoops(application, seqSparseProp, sparseNoise, seqSparseLoops[i]);
+            makeSeqZProps(application, solver, action, tj, qmom, sparseProps[h][i], unpackedNoises[h], seqSparsePropName, seqSparseProps[h][i]);
+            // unpackProps(application, seqSparseProps, nds, seqSparseProp);
+            makeLoops(application, seqSparseProps[h][i], unpackedNoises[h], seqSparseLoops[h][i]);
         }
 
+        for (unsigned int h = 0; h < nHits; ++h)
         for (unsigned int i = 1; i < flavour.size(); ++i)
+        for (unsigned int j = 0; j < sparseLoops[h][i].size(); ++j)
         {
-            for (unsigned int j = 0; j < sparseLoops[i].size(); ++j)
-            {
-                std::string seqLoop = seqSparseLoops[i][j];
-                std::string sparseName = flavour[i] + "_" + std::to_string(j);
+            std::string seqLoop = seqSparseLoops[h][i][j];
+            std::string sparseName = flavour[i] + "_" + std::to_string(h) + "_" + std::to_string(j);
 
-                std::string resWHE4ptVcLoop = resultStem + "/4pt/RK/4pt_Eye_" + sparseName
-                                          + "_VC" + smu + "_Loop_tK_" + timeStamp;
-                std::string WHE4ptVcLoop = "4pt_VC" + smu + "_Eye_Loop_" + sparseName + "_tK_" + stk;
-                auto weLoop4ptEntry = makeEntry4pt(baseEntry, "E_loop", flavour[i], j);
-                makeWeakEye(application, qWallksZeromom, qWallplbarPmom, smearedqWallklZeromom, seqLoop,
-                            gammaIn, gammaOut, tp, resWHE4ptVcLoop, WHE4ptVcLoop,
-                            weLoop4ptEntry, "Four_point");
-            }
+            std::string resWHE4ptVcLoop = resultStem + "/4pt/RK/4pt_Eye_" + sparseName
+                                      + "_VC" + smu + "_Loop_tK_" + timeStamp;
+            std::string WHE4ptVcLoop = "4pt_VC" + smu + "_Eye_Loop_" + sparseName + "_tK_" + stk;
+            auto weLoop4ptEntry = makeEntry4pt(baseEntry, "E_loop", flavour[i], h, j);
+            makeWeakEye(application, qWallksZeromom, qWallplbarPmom, smearedqWallklZeromom, seqLoop,
+                        gammaIn, gammaOut, tp, resWHE4ptVcLoop, WHE4ptVcLoop,
+                        weLoop4ptEntry, "Four_point");
         }
 
         //////////////////////////////////////////////////
         // Neutral Disconnected Diagram
         //////////////////////////////////////////////////
+        for (unsigned int h = 0; h < nHits; ++h)
         for (unsigned int i = 1; i < flavour.size(); ++i)
+        for (unsigned int j = 0; j < sparseLoops[h][i].size(); ++j)
         {
-            for (unsigned int j = 0; j < sparseLoops[i].size(); ++j)
-            {
-                std::string loop = sparseLoops[i][j];
-                std::string sparseName = flavour[i] + "_" + std::to_string(j);
-                std::string resDisc0Loop = resultStem + "/4pt/disc0/disc0_VC" + smu
-                                           + "_" + sparseName + "mom" + sPMom + "_tK_" + timeStamp;
-                std::string disc0Loop = "disc0_VC" + smu + "_" + flavour[i]
-                                        + "_" + std::to_string(tj) + "_" + std::to_string(j);
-                auto pi04ptEntry = makeEntry4pt(baseEntry, "pi0", flavour[i], j);
-                makeRareKaonNeutralDisc(application, qWallklZeromom, qWallksZeromom,
-                                        seqVcPLbarQmom, loop, resDisc0Loop, disc0Loop,
-                                        pi04ptEntry, "Four_point");
-            }
+            std::string loop = sparseLoops[h][i][j];
+            std::string sparseName = flavour[i] + "_" + std::to_string(h) + "_" + std::to_string(j);
+            std::string resDisc0Loop = resultStem + "/4pt/disc0/disc0_VC" + smu
+                                       + "_" + sparseName + "mom" + sPMom + "_tK_" + timeStamp;
+            std::string disc0Loop = "disc0_VC" + smu + "_" + sparseName + "_tK_" + stk;
+            auto pi04ptEntry = makeEntry4pt(baseEntry, "pi0", flavour[i], h, j);
+            makeRareKaonNeutralDisc(application, qWallklZeromom, qWallksZeromom,
+                                    seqVcPLbarQmom, loop, resDisc0Loop, disc0Loop,
+                                    pi04ptEntry, "Four_point");
         }
     }
 
     std::string xmlFileName = par.ioPar.xmlFileName;
     // execution
-    unsigned int prec = 16;
-    application.saveParameterFile(xmlFileName, prec);
-    application.run();
+    if(!populateResultDb)
+    {
+        unsigned int prec = 16;
+        application.saveParameterFile(xmlFileName, prec);
+        application.run();
+        LOG(Message) << "Grid is finalizing now" << std::endl;
 
-    // epilogue
-    LOG(Message) << "Grid is finalizing now" << std::endl;
+        Grid_finalize();
+    }
+    else
+    {
+        std::cout << "\n-- Populating dabatase..." << std::endl;
+        application.generateResultDb();
+        std::cout << "-- Done. " << std::endl;
 
-    Grid_finalize();
+    }
 
     return EXIT_SUCCESS;
 }

@@ -91,6 +91,7 @@ struct Entry3ptHw: public SqlEntry
                        SqlNotNull<std::string>,         diag,
                        SqlNotNull<std::vector<double>>, mom,
                        std::string,                     gim,
+                       int,                             hit,
                        int,                             noise);
 };
 
@@ -99,7 +100,9 @@ Entry3ptHw makeEntry3ptHw(int                 tK,
                           std::string         diag,
                           std::vector<double> mom,
                           std::string         gim,
+                          int                 hit,
                           int                 noise,
+                          bool                nullHit=false,
                           bool                nullNoise=false)
 {
     Entry3ptHw entry3pt;
@@ -108,7 +111,9 @@ Entry3ptHw makeEntry3ptHw(int                 tK,
     entry3pt.diag  = diag;
     entry3pt.mom   = mom;
     entry3pt.gim   = gim;
+    entry3pt.hit   = hit;
     entry3pt.noise = noise;
+    entry3pt.nullify.hit = nullHit;
     entry3pt.nullify.noise = nullNoise;
 
     return entry3pt; 
@@ -118,19 +123,24 @@ struct Entry4pt: public SqlEntry
 {
     HADRONS_SQL_FIELDS(SqlNotNull<std::string>, diag,
                        std::string,             gim,
+                       int,                     hit,
                        int,                     noise);
 };
 
 MergedSqlEntry<BaseEntry, Entry4pt> makeEntry4pt(BaseEntry   baseEntry,
                                                  std::string diag,
                                                  std::string gim,
+                                                 int         hit,
                                                  int         noise,
+                                                 bool        nullHit=false,
                                                  bool        nullNoise=false)
 {
     Entry4pt entry4pt;
     entry4pt.diag  = diag;
     entry4pt.gim   = gim;
+    entry4pt.hit   = hit;
     entry4pt.noise = noise;
+    entry4pt.nullify.hit = nullHit;
     entry4pt.nullify.noise = nullNoise;
 
     auto mergedEntry(mergeSqlEntries(baseEntry, entry4pt));
@@ -142,16 +152,19 @@ struct DiscLoopEntry: public SqlEntry
 {
     HADRONS_SQL_FIELDS(SqlNotNull<std::vector<double>>, mom,
                        SqlNotNull<std::string>,         flavor,
+                       SqlNotNull<int>,                 hit,
                        SqlNotNull<int>,                 noise);
 };
 
 DiscLoopEntry makeDiscLoopEntry(std::vector<double> mom,
                                 std::string         flavor,
+                                int                 hit,
                                 int                 noise)
 {
     DiscLoopEntry entryDL;
     entryDL.mom    = mom;
     entryDL.flavor = flavor;
+    entryDL.hit    = hit;
     entryDL.noise  = noise;
 
     return entryDL; 
