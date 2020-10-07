@@ -67,7 +67,8 @@ namespace RareKaonInputs
                                         std::string, qmom,
                                         std::string, mqmom,
                                         std::string, sinkkmom,
-                                        std::string, sinkpmom);
+                                        std::string, sinkpmom,
+                                        std::string, sinkqmom);
     };
 
     class GammaPar : Serializable
@@ -204,6 +205,7 @@ int main(int argc, char *argv[])
     std::string mqmom = par.momPar.mqmom;
     std::string sinkkmom = par.momPar.sinkkmom;
     std::string sinkpmom = par.momPar.sinkpmom;
+    std::string sinkqmom = par.momPar.sinkqmom;
     std::string sKMom = sanitizeMom(sinkkmom);
     std::string sPMom = sanitizeMom(sinkpmom);
     std::vector<double> vKMom = strToVec<double>(sinkkmom);
@@ -480,6 +482,8 @@ int main(int argc, char *argv[])
     makePointSink(application, sinkkmom, sinkZeromom);
     std::string sinkPmom = "sinkPmom";
     makePointSink(application, sinkpmom, sinkPmom);
+    std::string sinkQmom = "sinkQmom";
+    makePointSink(application, sinkqmom, sinkQmom);
 
 
     std::string  twoPtGammas     = par.gammaPar.twoPtGammas;
@@ -538,12 +542,16 @@ int main(int argc, char *argv[])
         makeWallZProp(application, lightSolver, pmom, tp, qWallplbarPmom);
 
         // Smeared propagators
-        std::string smearedqWallksPmom = "smearedQWall_s_Pmom" + stk;
-        makeSmearedProp(application, qWallksPmom, sinkZeromom, smearedqWallksPmom);
-        std::string smearedqWallklPmom = "smearedQWall_l_Pmom" + stk;
-        makeSmearedProp(application, qWallklPmom, sinkZeromom, smearedqWallklPmom);
+        // sink zero momentum
         std::string smearedqWallplPmom = "smearedQWall_l_Pmom" + stp;
         makeSmearedProp(application, qWallplbarPmom, sinkZeromom, smearedqWallplPmom);
+        // sink nonzero momentum
+        std::string smearedqWallksKmomQsink = "smearedQWall_s_KmomPsink" + stk;
+        makeSmearedProp(application, qWallksZeromom, sinkQmom, smearedqWallksKmomQsink);
+        std::string smearedqWallksPmomQsink = "smearedQWall_s_PmomPsink" + stk;
+        makeSmearedProp(application, qWallksPmom, sinkQmom, smearedqWallksPmomQsink);
+        std::string smearedqWallplPmomQsink = "smearedQWall_l_PmomPsink" + stp;
+        makeSmearedProp(application, qWallplbarPmom, sinkQmom, smearedqWallplPmomQsink);
 
         //////////////////////////////////////////////////
         // Sequential propagators
@@ -565,16 +573,18 @@ int main(int argc, char *argv[])
                      tj, qmom, qWallplbarPmom, wallSourcePmomP, seqVcPLbarQmom);
 
         // Smeared sequential propagators
-        std::string smearedqWallVcKLQmom = "smearedQWall_Kl_VC" + smu + "_Qmom_" + stk;
-        makeSmearedProp(application, seqVcKLQmom, sinkPmom, smearedqWallVcKLQmom);
+        // sink zero momentum
+        std::string smearedqWallVcKLQmomKsink = "smearedQWall_Kl_VC" + smu + "_QmomKsink_" + stk;
+        makeSmearedProp(application, seqVcKLQmom, sinkZeromom, smearedqWallVcKLQmomKsink);
         std::string smearedqWallVcKspecQmom = "smearedQWall_kspec_VC" + smu + "_Qmom_" + stk;
         makeSmearedProp(application, seqVcKLQmom, sinkZeromom, smearedqWallVcKspecQmom);
-        std::string smearedqWallVcKSmQmom = "smearedQWall_Ks_VC" + smu + "_mQmom_" + stk;
-        makeSmearedProp(application, seqVcKSMqmom, sinkZeromom, smearedqWallVcKSmQmom);
         std::string smearedqWallVcPLmQmom = "smearedQWall_PL_VC" + smu + "_mQmom_" + stk;
         makeSmearedProp(application, seqVcPLMqmom, sinkZeromom, smearedqWallVcPLmQmom);
         std::string smearedqWallVcPLbarQmom = "smearedQWall_PL_VC" + smu + "_Qmom_" + stk;
         makeSmearedProp(application, seqVcPLbarQmom, sinkZeromom, smearedqWallVcPLbarQmom);
+        // sink nonzero momentum
+        std::string smearedqWallVcKSmQmomQsink = "smearedQWall_Ks_VC" + smu + "_mQmomQsink_" + stk;
+        makeSmearedProp(application, seqVcKSMqmom, sinkQmom, smearedqWallVcKSmQmomQsink);
 
         //////////////////////////////////////////////////
         // Contractions
@@ -626,21 +636,21 @@ int main(int argc, char *argv[])
         std::string wallWallMesonKPmomRes = resultStem + "/2pt/WallWall/2ptKaon_WW_mom" + sPMom + "_tK_" + timeStamp;
         std::string wallWallMesonKPmom = "wallWallMesonKPmom_" + stk;
         auto wwKP2ptEntry = makeEntry2pt(tk, "kaon", "wall", vPMom);
-        makeMeson(application, smearedqWallklPmom, smearedqWallksPmom, sink2ptZeromom,
+        makeMeson(application, smearedqWallklZeromom, smearedqWallksPmomQsink, sink2ptZeromom,
                   twoPtGammas, wallWallMesonKPmomRes, wallWallMesonKPmom,
                   wwKP2ptEntry, "Two_point");
         // Light insertion: K->pi momentum
         std::string wallWallMesonKLRes = resultStem + "/3pt/VC" + smu + "/3ptKaon_WW_VC" + smu + "L_tK_" + timeStamp;
         std::string wallWallMesonKL = "wallWallMesonKL_" + stk;
         auto wwKL3ptEntry = makeEntry3ptVC(vKMom, vQMom, vPMom, tk, tj, "kaon_l", "wall");
-        makeMeson(application, smearedqWallVcKLQmom, smearedqWallksZeromom, sink2ptPmom,
+        makeMeson(application, smearedqWallVcKLQmomKsink, smearedqWallksKmomQsink, sink2ptPmom,
                   twoPtGammas, wallWallMesonKLRes, wallWallMesonKL,
                   wwKL3ptEntry, "Three_point_Vc");
         // Strange instertion: K->pi momentum
         std::string wallWallMesonKSRes = resultStem + "/3pt/VC" + smu + "/3ptKaon_WW_VC" + smu + "S_tK_" + timeStamp;
         std::string wallWallMesonKS = "wallWallMesonKS_" + stk;
         auto wwKS3ptEntry = makeEntry3ptVC(vKMom, vQMom, vPMom, tk, tj, "kaon_sbar", "wall");
-        makeMeson(application, smearedqWallklPmom, smearedqWallVcKSmQmom, sink2ptPmom,
+        makeMeson(application, smearedqWallklZeromom, smearedqWallVcKSmQmomQsink, sink2ptPmom,
                   twoPtGammas, wallWallMesonKSRes, wallWallMesonKS,
                   wwKS3ptEntry, "Three_point_Vc");
 
@@ -690,7 +700,7 @@ int main(int argc, char *argv[])
         std::string wallWallMesonPiPmomRes = resultStem + "/2pt/WallWall/2ptPion_WW_mom" + sPMom + "_tK_" + timeStamp;
         std::string wallWallMesonPiPmom = "wallWallMesonPiPmom_" + stk;
         auto wwPP2ptEntry = makeEntry2pt(tp, "pion", "wall", vPMom);
-        makeMeson(application, smearedqWallplPmom, smearedqWallplPmom, sink2ptPmom,
+        makeMeson(application, smearedqWallplZeromom, smearedqWallplPmomQsink, sink2ptPmom,
                   twoPtGammas, wallWallMesonPiPmomRes, wallWallMesonPiPmom,
                   wwPP2ptEntry, "Two_point");
         // Light insertion: K->pi momentum
@@ -866,7 +876,6 @@ int main(int argc, char *argv[])
                                          + "_" + flavour[i] + "_" + timeStamp;
 
             makeSeqZProps(application, solver, action, tj, qmom, sparseProps[h][i], unpackedNoises[h], seqSparsePropName, seqSparseProps[h][i]);
-            // unpackProps(application, seqSparseProps, nds, seqSparseProp);
             makeLoops(application, seqSparseProps[h][i], unpackedNoises[h], seqSparseLoops[h][i]);
         }
 
