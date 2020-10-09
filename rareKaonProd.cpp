@@ -551,8 +551,6 @@ int main(int argc, char *argv[])
         // Nonzero momentum
         std::string qWallksPmom = "QWall_s_Pmom_" + stk;
         makeWallProp(application, strangeSolver, pmom, tk, qWallksPmom);
-        std::string qWallklPmom = "QWall_l_Pmom_" + stk;
-        makeWallZProp(application, lightSolver, pmom, tk, qWallklPmom);
         std::string qWallplbarPmom = "QWall_l_Pmom_" + stp;
         makeWallZProp(application, lightSolver, pmom, tp, qWallplbarPmom);
 

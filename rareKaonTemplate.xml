@@ -17,6 +17,8 @@
     <dbPar>
         <applicationDb>rareK@pmom@App.db</applicationDb>
         <resultDb>rareKaonResults.db</resultDb>
+        <createProfile>@createProf@</createProfile>
+        <createSchedule>@createSched@</createSchedule>
         <restoreSchedule>@resSched@</restoreSchedule>
         <restoreModules>@resMod@</restoreModules>
         <restoreMemoryProfile>@resMem@</restoreMemoryProfile>
