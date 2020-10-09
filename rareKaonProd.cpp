@@ -41,6 +41,8 @@ namespace RareKaonInputs
         GRID_SERIALIZABLE_CLASS_MEMBERS(DbPar,
                                         std::string, applicationDb,
                                         std::string, resultDb,
+                                        bool,        createProfile,
+                                        bool,        createSchedule,
                                         bool,        restoreSchedule,
                                         bool,        restoreModules,
                                         bool,        restoreMemoryProfile,
@@ -149,6 +151,7 @@ struct RareKaonPar
     RareKaonInputs::CharmActionPar   charm2ActionPar;
     RareKaonInputs::CharmActionPar   charm3ActionPar;
     RareKaonInputs::LightActionPar   lightActionPar;
+    RareKaonInputs::GeneticPar       geneticPar;
     RareKaonInputs::ZMobiusPar       zMobiusPar;
     RareKaonInputs::TrajRange        trajRange;
     RareKaonInputs::GammaPar         gammaPar;
@@ -182,6 +185,7 @@ int main(int argc, char *argv[])
     read(reader,  "charm2ActionPar",  par.charm2ActionPar);
     read(reader,  "charm3ActionPar",  par.charm3ActionPar);
     read(reader,   "lightActionPar",   par.lightActionPar);
+    read(reader,       "geneticPar",       par.geneticPar);
     read(reader,       "zMobiusPar",       par.zMobiusPar);
     read(reader,        "trajRange",        par.trajRange);
     read(reader,         "gammaPar",         par.gammaPar);
@@ -215,9 +219,11 @@ int main(int argc, char *argv[])
     std::string resultStem = par.ioPar.resultStem;
 
     // initialization //////////////////////////////////////////////////////////
+    bool createProfile = par.dbPar.createProfile;
+    bool createSchedule = par.dbPar.createSchedule;
     bool populateResultDb = par.dbPar.populateResultDb;
 
-    if(!populateResultDb)
+    if(!(populateResultDb) && !(createSchedule))
     {
         Grid_init(&argc, &argv);
         HadronsLogError.Active(GridLogError.isActive());
@@ -239,13 +245,23 @@ int main(int argc, char *argv[])
     globalPar.database.resultDb             = par.dbPar.resultDb;
     globalPar.database.restoreSchedule      = par.dbPar.restoreSchedule;
     globalPar.database.restoreModules       = par.dbPar.restoreModules;
+    if (createSchedule) globalPar.database.restoreModules = true;
     globalPar.database.restoreMemoryProfile = par.dbPar.restoreMemoryProfile;
+    if (createSchedule) globalPar.database.restoreMemoryProfile = true;
     globalPar.database.makeStatDb           = par.dbPar.makeStatDb;
-    globalPar.genetic.popSize               = 10;
-    globalPar.genetic.maxGen                = 500;
-    globalPar.genetic.maxCstGen             = 40;
-    globalPar.genetic.mutationRate          = 0.1;
+    globalPar.genetic.popSize               = par.geneticPar.popSize;
+    globalPar.genetic.maxGen                = par.geneticPar.maxGen;
+    globalPar.genetic.maxCstGen             = par.geneticPar.maxCstGen;
+    globalPar.genetic.mutationRate          = par.geneticPar.mutationRate;
     application.setPar(globalPar);
+
+    if(createSchedule)
+    {
+        LOG(Message) << "Creating schedule from loaded modules" << std::endl;
+        VirtualMachine::getInstance().schedule(globalPar.genetic);
+        LOG(Message) << "Done. " << std::endl;
+        return EXIT_SUCCESS;
+    }
 
     // action parameters ///////////////////////////////////////////////////////////////
     std::vector<std::string> flavour = {"s", "l", "c1", "c2", "c3"};
@@ -285,7 +301,6 @@ int main(int argc, char *argv[])
     {
         application.createModule<MGauge::Unit>("gauge");
     }
-    
 
     // gauge field cast
     MUtilities::GaugeSinglePrecisionCast::Par gaugefPar;
@@ -914,24 +929,32 @@ int main(int argc, char *argv[])
         }
     }
 
-    std::string xmlFileName = par.ioPar.xmlFileName;
-    // execution
-    if(!populateResultDb)
+    if(populateResultDb)
     {
-        unsigned int prec = 16;
-        application.saveParameterFile(xmlFileName, prec);
-        application.run();
-        LOG(Message) << "Grid is finalizing now" << std::endl;
-
-        Grid_finalize();
-    }
-    else
-    {
-        std::cout << "\n-- Populating dabatase..." << std::endl;
+        LOG(Message) << "Populating result dabatase..." << std::endl;
         application.generateResultDb();
-        std::cout << "-- Done. " << std::endl;
+        LOG(Message) << "Done. " << std::endl;
 
+        return EXIT_SUCCESS;
     }
+
+    if(createProfile)
+    {
+        LOG(Message) << "Creating memory profile..." << std::endl;
+        VirtualMachine::getInstance().getMemoryProfile();
+        LOG(Message) << "Done. " << std::endl;
+
+        return EXIT_SUCCESS;
+    }
+
+    // execution
+    std::string xmlFileName = par.ioPar.xmlFileName;
+    unsigned int prec = 16;
+    application.saveParameterFile(xmlFileName, prec);
+    application.run();
+    LOG(Message) << "Grid is finalizing now" << std::endl;
+
+    Grid_finalize();
 
     return EXIT_SUCCESS;
 }
