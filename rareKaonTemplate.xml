@@ -49,6 +49,7 @@
     </gammaPar>
     <noisePar>
         <nHits>@nHits@</nHits>
+        <hitFloor>@hitFloor@</hitFloor>
     </noisePar>
     <ioPar>
         <gaugeFile>config/ckpoint_lat</gaugeFile>

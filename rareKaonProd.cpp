@@ -88,7 +88,8 @@ namespace RareKaonInputs
     {
     public:
         GRID_SERIALIZABLE_CLASS_MEMBERS(NoisePar,
-                                        unsigned int, nHits);
+                                        unsigned int, nHits,
+                                        unsigned int, hitFloor);
     };
 
     class IOPar : Serializable
@@ -201,7 +202,9 @@ int main(int argc, char *argv[])
     unsigned int dtJ = par.timePar.dtJ;
     unsigned int dtP = par.timePar.dtP;
 
-    unsigned int nHits  = par.noisePar.nHits;
+    unsigned int nHits     = par.noisePar.nHits;
+    unsigned int hitFloor  = par.noisePar.hitFloor;
+    unsigned int hitRoof   = hitFloor + nHits;
 
     std::string kmom  = par.momPar.kmom;
     std::string pmom  = par.momPar.pmom;
@@ -433,7 +436,7 @@ int main(int argc, char *argv[])
     seqSparseProps.resize(nHits);
     sparseLoops.resize(nHits);
     seqSparseLoops.resize(nHits);
-    for (unsigned int h = 0; h < nHits; ++h)
+    for (unsigned int h = hitFloor; h < hitRoof; ++h)
     {
         std::string sparseNoise, sparseNoises;
         if (h == 0)
@@ -472,7 +475,7 @@ int main(int argc, char *argv[])
     std::vector<std::string> sDiscMom;
     vDiscMom.push_back(vKMom); vDiscMom.push_back(vPMom);
     sDiscMom.push_back(sKMom); sDiscMom.push_back(sPMom);
-    for (unsigned int h = 0; h < nHits; ++h)
+    for (unsigned int h = hitFloor; h < hitRoof; ++h)
     for (unsigned int i = 1; i < flavour.size(); ++i)
     for (unsigned int j = 0; j < sparseLoops[h][i].size(); ++j)
     for (unsigned int m = 0; m < discMom.size(); ++m)
@@ -823,7 +826,7 @@ int main(int argc, char *argv[])
         //////////////////////////////////////////////////
         // Weak Hamiltonian Eye Contractions
         //////////////////////////////////////////////////
-        for (unsigned int h = 0; h < nHits; ++h)
+        for (unsigned int h = hitFloor; h < hitRoof; ++h)
         for (unsigned int i = 1; i < flavour.size(); ++i)
         {
             for (unsigned int j = 0; j < sparseLoops[h][i].size(); ++j)
@@ -880,7 +883,7 @@ int main(int argc, char *argv[])
         //////////////////////////////////////////////////
         // Weak Hamiltonian Eye Loop Current Insertion
         //////////////////////////////////////////////////
-        for (unsigned int h = 0; h < nHits; ++h)
+        for (unsigned int h = hitFloor; h < hitRoof; ++h)
         for (unsigned int i = 1; i < flavour.size(); ++i)
         {
             std::string solver = "loopMcg_" + flavour[i];
@@ -892,7 +895,7 @@ int main(int argc, char *argv[])
             makeLoops(application, seqSparseProps[h][i], unpackedNoises[h], seqSparseLoops[h][i]);
         }
 
-        for (unsigned int h = 0; h < nHits; ++h)
+        for (unsigned int h = hitFloor; h < hitRoof; ++h)
         for (unsigned int i = 1; i < flavour.size(); ++i)
         for (unsigned int j = 0; j < sparseLoops[h][i].size(); ++j)
         {
@@ -911,7 +914,7 @@ int main(int argc, char *argv[])
         //////////////////////////////////////////////////
         // Neutral Disconnected Diagram
         //////////////////////////////////////////////////
-        for (unsigned int h = 0; h < nHits; ++h)
+        for (unsigned int h = hitFloor; h < hitRoof; ++h)
         for (unsigned int i = 1; i < flavour.size(); ++i)
         for (unsigned int j = 0; j < sparseLoops[h][i].size(); ++j)
         {
