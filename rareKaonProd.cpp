@@ -438,6 +438,7 @@ int main(int argc, char *argv[])
     seqSparseLoops.resize(nHits);
     for (unsigned int h = hitFloor; h < hitRoof; ++h)
     {
+        unsigned int hInd = h - hitFloor;
         std::string sparseNoise, sparseNoises;
         if (h == 0)
         {
@@ -450,20 +451,20 @@ int main(int argc, char *argv[])
         }
         
         makeZ2SparseSources(application, nsrc, nsparse, sparseNoises);
-        unpackProps(application, sparseNoises, nds, sparseNoise, unpackedNoises[h]);
+        unpackProps(application, sparseNoises, nds, sparseNoise, unpackedNoises[hInd]);
 
-        sparseProps[h].resize(flavour.size(), std::vector<std::string>(nds));
-        seqSparseProps[h].resize(flavour.size(), std::vector<std::string>(nds));
-        sparseLoops[h].resize(flavour.size(), std::vector<std::string>(nds));
-        seqSparseLoops[h].resize(flavour.size(), std::vector<std::string>(nds));
+        sparseProps[hInd].resize(flavour.size(), std::vector<std::string>(nds));
+        seqSparseProps[hInd].resize(flavour.size(), std::vector<std::string>(nds));
+        sparseLoops[hInd].resize(flavour.size(), std::vector<std::string>(nds));
+        seqSparseLoops[hInd].resize(flavour.size(), std::vector<std::string>(nds));
 
         for (unsigned int i = 1; i < flavour.size(); ++i)
         {
             std::string solver = "loopMcg_" + flavour[i];
             std::string sparsePropName = "sparseProps_" + std::to_string(h) + "_" + flavour[i];
 
-            makeZGaugeProps(application, solver, unpackedNoises[h], sparsePropName, sparseProps[h][i]);
-            makeLoops(application, sparseProps[h][i], unpackedNoises[h], sparseLoops[h][i]);
+            makeZGaugeProps(application, solver, unpackedNoises[hInd], sparsePropName, sparseProps[hInd][i]);
+            makeLoops(application, sparseProps[hInd][i], unpackedNoises[hInd], sparseLoops[hInd][i]);
         }
     }
 
@@ -476,18 +477,22 @@ int main(int argc, char *argv[])
     vDiscMom.push_back(vKMom); vDiscMom.push_back(vPMom);
     sDiscMom.push_back(sKMom); sDiscMom.push_back(sPMom);
     for (unsigned int h = hitFloor; h < hitRoof; ++h)
-    for (unsigned int i = 1; i < flavour.size(); ++i)
-    for (unsigned int j = 0; j < sparseLoops[h][i].size(); ++j)
-    for (unsigned int m = 0; m < discMom.size(); ++m)
     {
-        std::string loop = sparseLoops[h][i][j];
-        std::string sparseName = flavour[i] + "_" + std::to_string(h) + "_" + std::to_string(j);
-        std::string resDiscLoop = resultStem + "/disc/disc_"
-                                  + sDiscMom[m] + "_" + sparseName;
-        std::string discLoop = "disc_" + sDiscMom[m] + "_" + sparseName;
-        auto dlVcEntry = makeDiscLoopEntry(vDiscMom[m], flavour[i], h, j);
-        makeDiscLoop(application, loop, discMom[m], resDiscLoop, discLoop,
-                     dlVcEntry, "Disconnected");
+        unsigned int hInd = h - hitFloor;
+        for (unsigned int i = 1; i < flavour.size(); ++i)
+        for (unsigned int j = 0; j < sparseLoops[hInd][i].size(); ++j)
+        for (unsigned int m = 0; m < discMom.size(); ++m)
+        {
+            std::string loop = sparseLoops[hInd][i][j];
+            std::string sparseName = flavour[i] + "_" + std::to_string(h) + "_" + std::to_string(j);
+            std::string resDiscLoop = resultStem + "/disc/disc_"
+                                      + sDiscMom[m] + "_" + sparseName;
+            std::string discLoop = "disc_" + sDiscMom[m] + "_" + sparseName;
+            auto dlVcEntry = makeDiscLoopEntry(vDiscMom[m], flavour[i], h, j);
+            makeDiscLoop(application, loop, discMom[m], resDiscLoop, discLoop,
+                         dlVcEntry, "Disconnected");
+        }
+
     }
 
     // sinks
@@ -827,11 +832,12 @@ int main(int argc, char *argv[])
         // Weak Hamiltonian Eye Contractions
         //////////////////////////////////////////////////
         for (unsigned int h = hitFloor; h < hitRoof; ++h)
-        for (unsigned int i = 1; i < flavour.size(); ++i)
         {
-            for (unsigned int j = 0; j < sparseLoops[h][i].size(); ++j)
+            unsigned int hInd = h - hitFloor;
+            for (unsigned int i = 1; i < flavour.size(); ++i)
+            for (unsigned int j = 0; j < sparseLoops[hInd][i].size(); ++j)
             {
-                std::string loop3pt = sparseLoops[h][i][j];
+                std::string loop3pt = sparseLoops[hInd][i][j];
                 std::string sparseName = flavour[i] + "_" + std::to_string(h) + "_" + std::to_string(j);
                 // 3pt Contractions
                 // Kaon momentum
@@ -884,49 +890,58 @@ int main(int argc, char *argv[])
         // Weak Hamiltonian Eye Loop Current Insertion
         //////////////////////////////////////////////////
         for (unsigned int h = hitFloor; h < hitRoof; ++h)
-        for (unsigned int i = 1; i < flavour.size(); ++i)
         {
-            std::string solver = "loopMcg_" + flavour[i];
-            std::string action = "dwf_" + flavour[i];
-            std::string seqSparsePropName = "seqSparseProp_" + std::to_string(h)
-                                         + "_" + flavour[i] + "_" + timeStamp;
+            unsigned int hInd = h - hitFloor;
+            for (unsigned int i = 1; i < flavour.size(); ++i)
+            {
+                std::string solver = "loopMcg_" + flavour[i];
+                std::string action = "dwf_" + flavour[i];
+                std::string seqSparsePropName = "seqSparseProp_" + std::to_string(h)
+                                             + "_" + flavour[i] + "_" + timeStamp;
 
-            makeSeqZProps(application, solver, action, tj, qmom, sparseProps[h][i], unpackedNoises[h], seqSparsePropName, seqSparseProps[h][i]);
-            makeLoops(application, seqSparseProps[h][i], unpackedNoises[h], seqSparseLoops[h][i]);
+                makeSeqZProps(application, solver, action, tj, qmom, sparseProps[hInd][i], unpackedNoises[hInd], seqSparsePropName, seqSparseProps[hInd][i]);
+                makeLoops(application, seqSparseProps[hInd][i], unpackedNoises[hInd], seqSparseLoops[hInd][i]);
+            }
         }
 
         for (unsigned int h = hitFloor; h < hitRoof; ++h)
-        for (unsigned int i = 1; i < flavour.size(); ++i)
-        for (unsigned int j = 0; j < sparseLoops[h][i].size(); ++j)
         {
-            std::string seqLoop = seqSparseLoops[h][i][j];
-            std::string sparseName = flavour[i] + "_" + std::to_string(h) + "_" + std::to_string(j);
+            unsigned int hInd = h - hitFloor;
+            for (unsigned int i = 1; i < flavour.size(); ++i)
+            for (unsigned int j = 0; j < sparseLoops[hInd][i].size(); ++j)
+            {
+                std::string seqLoop = seqSparseLoops[hInd][i][j];
+                std::string sparseName = flavour[i] + "_" + std::to_string(h) + "_" + std::to_string(j);
 
-            std::string resWHE4ptVcLoop = resultStem + "/4pt/RK/4pt_Eye_" + sparseName
-                                      + "_VC" + smu + "_Loop_tK_" + timeStamp;
-            std::string WHE4ptVcLoop = "4pt_VC" + smu + "_Eye_Loop_" + sparseName + "_tK_" + stk;
-            auto weLoop4ptEntry = makeEntry4pt(baseEntry, "E_loop", flavour[i], h, j);
-            makeWeakEye(application, qWallksZeromom, qWallplbarPmom, smearedqWallklZeromom, seqLoop,
-                        gammaIn, gammaOut, tp, resWHE4ptVcLoop, WHE4ptVcLoop,
-                        weLoop4ptEntry, "Four_point");
+                std::string resWHE4ptVcLoop = resultStem + "/4pt/RK/4pt_Eye_" + sparseName
+                                          + "_VC" + smu + "_Loop_tK_" + timeStamp;
+                std::string WHE4ptVcLoop = "4pt_VC" + smu + "_Eye_Loop_" + sparseName + "_tK_" + stk;
+                auto weLoop4ptEntry = makeEntry4pt(baseEntry, "E_loop", flavour[i], h, j);
+                makeWeakEye(application, qWallksZeromom, qWallplbarPmom, smearedqWallklZeromom, seqLoop,
+                            gammaIn, gammaOut, tp, resWHE4ptVcLoop, WHE4ptVcLoop,
+                            weLoop4ptEntry, "Four_point");
+            }
         }
 
         //////////////////////////////////////////////////
         // Neutral Disconnected Diagram
         //////////////////////////////////////////////////
         for (unsigned int h = hitFloor; h < hitRoof; ++h)
-        for (unsigned int i = 1; i < flavour.size(); ++i)
-        for (unsigned int j = 0; j < sparseLoops[h][i].size(); ++j)
         {
-            std::string loop = sparseLoops[h][i][j];
-            std::string sparseName = flavour[i] + "_" + std::to_string(h) + "_" + std::to_string(j);
-            std::string resDisc0Loop = resultStem + "/4pt/disc0/disc0_VC" + smu
-                                       + "_" + sparseName + "mom" + sPMom + "_tK_" + timeStamp;
-            std::string disc0Loop = "disc0_VC" + smu + "_" + sparseName + "_tK_" + stk;
-            auto pi04ptEntry = makeEntry4pt(baseEntry, "pi0", flavour[i], h, j);
-            makeRareKaonNeutralDisc(application, qWallklZeromom, qWallksZeromom,
-                                    seqVcPLbarQmom, loop, resDisc0Loop, disc0Loop,
-                                    pi04ptEntry, "Four_point");
+            unsigned int hInd = h - hitFloor;
+            for (unsigned int i = 1; i < flavour.size(); ++i)
+            for (unsigned int j = 0; j < sparseLoops[hInd][i].size(); ++j)
+            {
+                std::string loop = sparseLoops[hInd][i][j];
+                std::string sparseName = flavour[i] + "_" + std::to_string(h) + "_" + std::to_string(j);
+                std::string resDisc0Loop = resultStem + "/4pt/disc0/disc0_VC" + smu
+                                           + "_" + sparseName + "mom" + sPMom + "_tK_" + timeStamp;
+                std::string disc0Loop = "disc0_VC" + smu + "_" + sparseName + "_tK_" + stk;
+                auto pi04ptEntry = makeEntry4pt(baseEntry, "pi0", flavour[i], h, j);
+                makeRareKaonNeutralDisc(application, qWallklZeromom, qWallksZeromom,
+                                        seqVcPLbarQmom, loop, resDisc0Loop, disc0Loop,
+                                        pi04ptEntry, "Four_point");
+            }
         }
     }
 
