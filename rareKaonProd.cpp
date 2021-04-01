@@ -376,7 +376,7 @@ int main(int argc, char *argv[])
     application.createModule<MSolver::MixedPrecisionRBPrecCG>("mcg_" + flavour[0], solverParStrange);
 
 
-    // Zmobius action for loops: light, charm1, charm2, charm3
+    // This will be MADWF
     for (unsigned int i = 1; i < flavour.size(); ++i)
     {
         MAction::ZMobiusDWF::Par ZMobActionPar;
