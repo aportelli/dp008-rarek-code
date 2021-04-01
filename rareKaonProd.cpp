@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
     parFilename = argv[1];
-    use_MADWF = argv[2] != "0";
+    use_MADWF = argv[2] == "1";
 
     // parse parameter file
     RareKaonPar par;
@@ -379,43 +379,88 @@ int main(int argc, char *argv[])
 
 
     // This will be MADWF
-    for (unsigned int i = 1; i < flavour.size(); ++i)
+    if(use_MADWF)
     {
-        MAction::ZMobiusDWF::Par ZMobActionPar;
-        ZMobActionPar.gauge = "gaugeFix";
-        ZMobActionPar.Ls = Ls[1];
-        ZMobActionPar.M5 = M5[1];
-        ZMobActionPar.mass = mass[i];
-        ZMobActionPar.boundary = boundary;
-        ZMobActionPar.b = par.zMobiusPar.b;
-        ZMobActionPar.c = par.zMobiusPar.c;
-        ZMobActionPar.omega = par.zMobiusPar.omega;
-        ZMobActionPar.twist = twist;
-        application.createModule<MAction::ZMobiusDWF>("dwf_" + flavour[i], ZMobActionPar);
+        for (unsigned int i = 1; i < flavour.size(); ++i)
+        {
+        /*    MAction::ZMobiusDWF::Par ZMobActionPar;
+            ZMobActionPar.gauge = "gaugeFix";
+            ZMobActionPar.Ls = Ls[1];
+            ZMobActionPar.M5 = M5[1];
+            ZMobActionPar.mass = mass[i];
+            ZMobActionPar.boundary = boundary;
+            ZMobActionPar.b = par.zMobiusPar.b;
+            ZMobActionPar.c = par.zMobiusPar.c;
+            ZMobActionPar.omega = par.zMobiusPar.omega;
+            ZMobActionPar.twist = twist;
+            application.createModule<MAction::ZMobiusDWF>("dwf_" + flavour[i], ZMobActionPar);
+    
+            // actionF light
+            MAction::ZMobiusDWFF::Par ZMobFAction;
+            ZMobFAction.gauge = "gaugefFix";
+            ZMobFAction.Ls = Ls[1];
+            ZMobFAction.M5 = M5[1];
+            ZMobFAction.mass = mass[i];
+            ZMobFAction.boundary = boundary;
+            ZMobFAction.b = par.zMobiusPar.b;
+            ZMobFAction.c = par.zMobiusPar.c;
+            ZMobFAction.omega = par.zMobiusPar.omega;
+            ZMobFAction.twist = twist;
+            application.createModule<MAction::ZMobiusDWFF>("dwff_" + flavour[i], ZMobFAction);
+    
+            // solver light
+            MSolver::ZMixedPrecisionRBPrecCG::Par ZMobSolverPar;
+            ZMobSolverPar.innerAction = "dwff_" + flavour[i];
+            ZMobSolverPar.outerAction = "dwf_" + flavour[i];
+            ZMobSolverPar.residual = loopResidual[i];
+            ZMobSolverPar.maxInnerIteration = 30000;
+            ZMobSolverPar.maxOuterIteration = 100;
+            ZMobSolverPar.eigenPack = epack[i];
+            application.createModule<MSolver::ZMixedPrecisionRBPrecCG>("loopMcg_" + flavour[i], ZMobSolverPar);
+    */
+        }
 
-        // actionF light
-        MAction::ZMobiusDWFF::Par ZMobFAction;
-        ZMobFAction.gauge = "gaugefFix";
-        ZMobFAction.Ls = Ls[1];
-        ZMobFAction.M5 = M5[1];
-        ZMobFAction.mass = mass[i];
-        ZMobFAction.boundary = boundary;
-        ZMobFAction.b = par.zMobiusPar.b;
-        ZMobFAction.c = par.zMobiusPar.c;
-        ZMobFAction.omega = par.zMobiusPar.omega;
-        ZMobFAction.twist = twist;
-        application.createModule<MAction::ZMobiusDWFF>("dwff_" + flavour[i], ZMobFAction);
-
-        // solver light
-        MSolver::ZMixedPrecisionRBPrecCG::Par ZMobSolverPar;
-        ZMobSolverPar.innerAction = "dwff_" + flavour[i];
-        ZMobSolverPar.outerAction = "dwf_" + flavour[i];
-        ZMobSolverPar.residual = loopResidual[i];
-        ZMobSolverPar.maxInnerIteration = 30000;
-        ZMobSolverPar.maxOuterIteration = 100;
-        ZMobSolverPar.eigenPack = epack[i];
-        application.createModule<MSolver::ZMixedPrecisionRBPrecCG>("loopMcg_" + flavour[i], ZMobSolverPar);
-
+    }
+    else
+    {
+        for (unsigned int i = 1; i < flavour.size(); ++i)
+        {
+            MAction::ZMobiusDWF::Par ZMobActionPar;
+            ZMobActionPar.gauge = "gaugeFix";
+            ZMobActionPar.Ls = Ls[1];
+            ZMobActionPar.M5 = M5[1];
+            ZMobActionPar.mass = mass[i];
+            ZMobActionPar.boundary = boundary;
+            ZMobActionPar.b = par.zMobiusPar.b;
+            ZMobActionPar.c = par.zMobiusPar.c;
+            ZMobActionPar.omega = par.zMobiusPar.omega;
+            ZMobActionPar.twist = twist;
+            application.createModule<MAction::ZMobiusDWF>("dwf_" + flavour[i], ZMobActionPar);
+    
+            // actionF light
+            MAction::ZMobiusDWFF::Par ZMobFAction;
+            ZMobFAction.gauge = "gaugefFix";
+            ZMobFAction.Ls = Ls[1];
+            ZMobFAction.M5 = M5[1];
+            ZMobFAction.mass = mass[i];
+            ZMobFAction.boundary = boundary;
+            ZMobFAction.b = par.zMobiusPar.b;
+            ZMobFAction.c = par.zMobiusPar.c;
+            ZMobFAction.omega = par.zMobiusPar.omega;
+            ZMobFAction.twist = twist;
+            application.createModule<MAction::ZMobiusDWFF>("dwff_" + flavour[i], ZMobFAction);
+    
+            // solver light
+            MSolver::ZMixedPrecisionRBPrecCG::Par ZMobSolverPar;
+            ZMobSolverPar.innerAction = "dwff_" + flavour[i];
+            ZMobSolverPar.outerAction = "dwf_" + flavour[i];
+            ZMobSolverPar.residual = loopResidual[i];
+            ZMobSolverPar.maxInnerIteration = 30000;
+            ZMobSolverPar.maxOuterIteration = 100;
+            ZMobSolverPar.eigenPack = epack[i];
+            application.createModule<MSolver::ZMixedPrecisionRBPrecCG>("loopMcg_" + flavour[i], ZMobSolverPar);
+    
+        }
     }
 
     // Solver (non-loop): light
