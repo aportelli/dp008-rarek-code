@@ -167,15 +167,17 @@ int main(int argc, char *argv[])
 {
     // parse command line
     std::string parFilename;
+    bool use_MADWF;
 
-    if (argc < 2)
+    if (argc < 3)
     {
-        std::cerr << "usage: " << argv[0] << " <parameter file>";
+        std::cerr << "usage: " << argv[0] << " <parameter file>" << " <int use_MADWF>";
         std::cerr << std::endl;
 
         return EXIT_FAILURE;
     }
     parFilename = argv[1];
+    use_MADWF = argv[2] != "0";
 
     // parse parameter file
     RareKaonPar par;
