@@ -532,7 +532,14 @@ int main(int argc, char *argv[])
             std::string solver = "loopMcg_" + flavour[i];
             std::string sparsePropName = "sparseProps_" + std::to_string(h) + "_" + flavour[i];
 
-            makeZGaugeProps(application, solver, unpackedNoises[hInd], sparsePropName, sparseProps[hInd][i]);
+            if(use_MADWF)
+            {
+                makeGaugeProps(application, solver, unpackedNoises[hInd], sparsePropName, sparseProps[hInd][i]);
+            }
+            else
+            {
+                makeZGaugeProps(application, solver, unpackedNoises[hInd], sparsePropName, sparseProps[hInd][i]);
+            }
             makeLoops(application, sparseProps[hInd][i], unpackedNoises[hInd], sparseLoops[hInd][i]);
         }
     }
@@ -629,7 +636,14 @@ int main(int argc, char *argv[])
         std::string qWallksPmom = "QWall_s_Pmom_" + stk;
         makeWallProp(application, strangeSolver, pmom, tk, qWallksPmom);
         std::string qWallplbarPmom = "QWall_l_Pmom_" + stp;
-        makeWallZProp(application, lightSolver, pmom, tp, qWallplbarPmom);
+        if(use_MADWF)
+        {
+            makeWallProp(application, lightSolver, pmom, tp, qWallplbarPmom);
+        }
+        else
+        {
+            makeWallZProp(application, lightSolver, pmom, tp, qWallplbarPmom);
+        }
 
         // Smeared propagators
         // sink zero momentum
@@ -650,17 +664,41 @@ int main(int argc, char *argv[])
         std::string wallSourcePmomK = makeWallSourceName(tp, kmom);
         std::string wallSourcePmomP = makeWallSourceName(tp, pmom);
         std::string seqVcKLQmom = "VC" + smu + "_KL_" + qWallklZeromom;
-        makeSeqZProp(application, lightSolver, lightAction, 
+        if(use_MADWF)
+        {
+            makeSeqProp(application, lightSolver, lightAction, 
                      tj, qmom, qWallklZeromom, wallSourceKmomK, seqVcKLQmom);
+        }
+        else
+        {
+            makeSeqZProp(application, lightSolver, lightAction, 
+                     tj, qmom, qWallklZeromom, wallSourceKmomK, seqVcKLQmom);
+        }
         std::string seqVcKSMqmom = "VC" + smu + "_KS_" + qWallksZeromom;
         makeSeqProp(application, strangeSolver, strangeAction,
                     tj, mqmom, qWallksZeromom, wallSourceKmomK, seqVcKSMqmom);
         std::string seqVcPLMqmom = "VC" + smu + "_PL_" + qWallplZeromom;
-        makeSeqZProp(application, lightSolver, lightAction,
+        if(use_MADWF)
+        {
+            makeSeqProp(application, lightSolver, lightAction,
                      tj, mqmom, qWallplZeromom, wallSourcePmomK, seqVcPLMqmom);
+        }
+        else
+        {
+            makeSeqZProp(application, lightSolver, lightAction,
+                     tj, mqmom, qWallplZeromom, wallSourcePmomK, seqVcPLMqmom);
+        }
         std::string seqVcPLbarQmom = "VC" + smu + "_PLbar_" + qWallplbarPmom;
-        makeSeqZProp(application, lightSolver, lightAction,
+        if(use_MADWF)
+        {
+            makeSeqProp(application, lightSolver, lightAction,
                      tj, qmom, qWallplbarPmom, wallSourcePmomP, seqVcPLbarQmom);
+        }
+        else
+        {
+            makeSeqZProp(application, lightSolver, lightAction,
+                     tj, qmom, qWallplbarPmom, wallSourcePmomP, seqVcPLbarQmom);
+        }
 
         // Smeared sequential propagators
         // sink zero momentum
@@ -968,7 +1006,14 @@ int main(int argc, char *argv[])
                 std::string seqSparsePropName = "seqSparseProp_" + std::to_string(h)
                                              + "_" + flavour[i] + "_" + timeStamp;
 
-                makeSeqZProps(application, solver, action, tj, qmom, sparseProps[hInd][i], unpackedNoises[hInd], seqSparsePropName, seqSparseProps[hInd][i]);
+                if(use_MADWF)
+                {
+                    makeSeqProps(application, solver, action, tj, qmom, sparseProps[hInd][i], unpackedNoises[hInd], seqSparsePropName, seqSparseProps[hInd][i]);
+                }
+                else
+                {
+                    makeSeqZProps(application, solver, action, tj, qmom, sparseProps[hInd][i], unpackedNoises[hInd], seqSparsePropName, seqSparseProps[hInd][i]);
+                }
                 makeLoops(application, seqSparseProps[hInd][i], unpackedNoises[hInd], seqSparseLoops[hInd][i]);
             }
         }
