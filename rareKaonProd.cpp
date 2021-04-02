@@ -383,19 +383,18 @@ int main(int argc, char *argv[])
     {
         for (unsigned int i = 1; i < flavour.size(); ++i)
         {
-        /*    MAction::ZMobiusDWF::Par ZMobActionPar;
-            ZMobActionPar.gauge = "gaugeFix";
-            ZMobActionPar.Ls = Ls[1];
-            ZMobActionPar.M5 = M5[1];
-            ZMobActionPar.mass = mass[i];
-            ZMobActionPar.boundary = boundary;
-            ZMobActionPar.b = par.zMobiusPar.b;
-            ZMobActionPar.c = par.zMobiusPar.c;
-            ZMobActionPar.omega = par.zMobiusPar.omega;
-            ZMobActionPar.twist = twist;
-            application.createModule<MAction::ZMobiusDWF>("dwf_" + flavour[i], ZMobActionPar);
+            //outer action: Mobius double precision
+            MAction::ScaledDWF::Par MobActionPar;
+            MobActionPar.gauge = "gaugeFix";
+            MobActionPar.Ls = Ls[1];
+            MobActionPar.M5 = M5[1];
+            MobActionPar.mass = mass[i];
+            MobActionPar.boundary = boundary;
+            MobActionPar.scale = 2; //still hard-coded!!!!
+            MobActionPar.twist = twist;
+            application.createModule<MAction::ScaledDWF>("dwf_" + flavour[i], MobActionPar);
     
-            // actionF light
+            //inner action: ZMobius single precision
             MAction::ZMobiusDWFF::Par ZMobFAction;
             ZMobFAction.gauge = "gaugefFix";
             ZMobFAction.Ls = Ls[1];
@@ -406,19 +405,32 @@ int main(int argc, char *argv[])
             ZMobFAction.c = par.zMobiusPar.c;
             ZMobFAction.omega = par.zMobiusPar.omega;
             ZMobFAction.twist = twist;
-            application.createModule<MAction::ZMobiusDWFF>("dwff_" + flavour[i], ZMobFAction);
+            application.createModule<MAction::ZMobiusDWFF>("Zdwff_" + flavour[i], ZMobFAction);
     
-            // solver light
-            MSolver::ZMixedPrecisionRBPrecCG::Par ZMobSolverPar;
-            ZMobSolverPar.innerAction = "dwff_" + flavour[i];
-            ZMobSolverPar.outerAction = "dwf_" + flavour[i];
-            ZMobSolverPar.residual = loopResidual[i];
-            ZMobSolverPar.maxInnerIteration = 30000;
-            ZMobSolverPar.maxOuterIteration = 100;
-            ZMobSolverPar.eigenPack = epack[i];
-            application.createModule<MSolver::ZMixedPrecisionRBPrecCG>("loopMcg_" + flavour[i], ZMobSolverPar);
-    */
+            //MADWF solver light
+            MSolver::ZMADWF_CG::Par MADWFPar;
+            MADWFPar.innerAction = "Zdwff_" + flavour[i];
+            MADWFPar.outerAction = "dwf_" + flavour[i];
+            MADWFPar.maxInnerIteration = 30000;
+            MADWFPar.maxOuterIteration = 100;
+            MADWFPar.maxPVIteration = 30000;
+            MADWFPar.innerResidual = loopResidual[i]; //different residuals??
+            MADWFPar.outerResidual = loopResidual[i];
+            MADWFPar.eigenPack = epack[i];
+            application.createModule<MSolver::ZMADWF_CG>("loopMcg_" + flavour[i], MADWFPar); //keep same name as in mixed precision case, otherwise too many names would need to be changed
+    
         }
+        //MADWF solver light - non-loop
+        MSolver::ZMADWF_CG::Par MADWFPar;
+        MADWFPar.innerAction = "Zdwff_" + flavour[1];
+        MADWFPar.outerAction = "dwf_" + flavour[1];
+        MADWFPar.maxInnerIteration = 30000;
+        MADWFPar.maxOuterIteration = 100;
+        MADWFPar.maxPVIteration = 30000;
+        MADWFPar.innerResidual = residual[i]; //different residuals??
+        MADWFPar.outerResidual = residual[i];
+        MADWFPar.eigenPack = epack[i];
+        application.createModule<MSolver::ZMADWF_CG>("mcg_" + flavour[1], MADWFPar); //keep same name as in mixed precision case, otherwise too many names would need to be changed
 
     }
     else
@@ -461,6 +473,16 @@ int main(int argc, char *argv[])
             application.createModule<MSolver::ZMixedPrecisionRBPrecCG>("loopMcg_" + flavour[i], ZMobSolverPar);
     
         }
+
+        // Solver (non-loop): light
+        MSolver::ZMixedPrecisionRBPrecCG::Par ZMobSolverPar;
+        ZMobSolverPar.innerAction = "dwff_" + flavour[1];
+        ZMobSolverPar.outerAction = "dwf_" + flavour[1];
+        ZMobSolverPar.residual = residual[1];
+        ZMobSolverPar.maxInnerIteration = 30000;
+        ZMobSolverPar.maxOuterIteration = 100;
+        ZMobSolverPar.eigenPack = epack[1];
+        application.createModule<MSolver::ZMixedPrecisionRBPrecCG>("mcg_" + flavour[1], ZMobSolverPar);
     }
 
     // Solver (non-loop): light
