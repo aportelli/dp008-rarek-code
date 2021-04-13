@@ -177,7 +177,15 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
     parFilename = argv[1];
-    use_MADWF = argv[2] == "1";
+    use_MADWF = !(strncmp(argv[2],"1",5));
+    if(use_MADWF)
+    {
+        LOG(Message) << "using MADWF action" << std::endl;
+    }
+    else
+    {
+        LOG(Message) << "using ZMobius action" << std::endl;
+    }
 
     // parse parameter file
     RareKaonPar par;
@@ -408,7 +416,7 @@ int main(int argc, char *argv[])
             application.createModule<MAction::ZMobiusDWFF>("Zdwff_" + flavour[i], ZMobFAction);
     
             //MADWF solver light
-            MSolver::ZMADWF_CG::Par MADWFPar;
+            MSolver::ZMADWFCG::Par MADWFPar;
             MADWFPar.innerAction = "Zdwff_" + flavour[i];
             MADWFPar.outerAction = "dwf_" + flavour[i];
             MADWFPar.maxInnerIteration = 30000;
@@ -417,20 +425,20 @@ int main(int argc, char *argv[])
             MADWFPar.innerResidual = loopResidual[i]; //different residuals??
             MADWFPar.outerResidual = loopResidual[i];
             MADWFPar.eigenPack = epack[i];
-            application.createModule<MSolver::ZMADWF_CG>("loopMcg_" + flavour[i], MADWFPar); //keep same name as in mixed precision case, otherwise too many names would need to be changed
+            application.createModule<MSolver::ZMADWFCG>("loopMcg_" + flavour[i], MADWFPar); //keep same name as in mixed precision case, otherwise too many names would need to be changed
     
         }
         //MADWF solver light - non-loop
-        MSolver::ZMADWF_CG::Par MADWFPar;
+        MSolver::ZMADWFCG::Par MADWFPar;
         MADWFPar.innerAction = "Zdwff_" + flavour[1];
         MADWFPar.outerAction = "dwf_" + flavour[1];
         MADWFPar.maxInnerIteration = 30000;
         MADWFPar.maxOuterIteration = 100;
         MADWFPar.maxPVIteration = 30000;
-        MADWFPar.innerResidual = residual[i]; //different residuals??
-        MADWFPar.outerResidual = residual[i];
-        MADWFPar.eigenPack = epack[i];
-        application.createModule<MSolver::ZMADWF_CG>("mcg_" + flavour[1], MADWFPar); //keep same name as in mixed precision case, otherwise too many names would need to be changed
+        MADWFPar.innerResidual = residual[1]; //different residuals??
+        MADWFPar.outerResidual = residual[1];
+        MADWFPar.eigenPack = epack[1];
+        application.createModule<MSolver::ZMADWFCG>("mcg_" + flavour[1], MADWFPar); //keep same name as in mixed precision case, otherwise too many names would need to be changed
 
     }
     else
@@ -484,16 +492,6 @@ int main(int argc, char *argv[])
         ZMobSolverPar.eigenPack = epack[1];
         application.createModule<MSolver::ZMixedPrecisionRBPrecCG>("mcg_" + flavour[1], ZMobSolverPar);
     }
-
-    // Solver (non-loop): light
-    MSolver::ZMixedPrecisionRBPrecCG::Par ZMobSolverPar;
-    ZMobSolverPar.innerAction = "dwff_" + flavour[1];
-    ZMobSolverPar.outerAction = "dwf_" + flavour[1];
-    ZMobSolverPar.residual = residual[1];
-    ZMobSolverPar.maxInnerIteration = 30000;
-    ZMobSolverPar.maxOuterIteration = 100;
-    ZMobSolverPar.eigenPack = epack[1];
-    application.createModule<MSolver::ZMixedPrecisionRBPrecCG>("mcg_" + flavour[1], ZMobSolverPar);
 
     // Sparse Noise Sources
     unsigned int nsrc = 1, nsparse = 2, nds = nsrc*pow(nsparse, 4);
