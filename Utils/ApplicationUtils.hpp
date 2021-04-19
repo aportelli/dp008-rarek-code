@@ -38,20 +38,6 @@ void makeZGaugeProp(Application &application, const std::string solver,
     }
 }
 
-void makeZGaugeProps(Application &application, const std::string solver,
-                    const std::vector<std::string> sources, const std::string name,
-                    std::vector<std::string> &props)
-{
-    std::string propName, srcName;
-    for (unsigned int i = 0; i < props.size(); ++i)
-    {
-      propName = name + "_" + std::to_string(i);
-      srcName  = sources[i];
-      makeZGaugeProp(application, solver, srcName, propName);
-      props[i] = propName;
-    }
-}
-
 void makeGaugeProp(Application &application, const std::string solver,
                    const std::string source, const std::string name)
 {
@@ -66,14 +52,20 @@ void makeGaugeProp(Application &application, const std::string solver,
 
 void makeGaugeProps(Application &application, const std::string solver,
                     const std::vector<std::string> sources, const std::string name,
-                    std::vector<std::string> &props)
+                    std::vector<std::string> &props, bool zProp)
 {
     std::string propName, srcName;
     for (unsigned int i = 0; i < props.size(); ++i)
     {
       propName = name + "_" + std::to_string(i);
       srcName  = sources[i];
-      makeGaugeProp(application, solver, srcName, propName);
+      if(zProp){	      
+        makeZGaugeProp(application, solver, srcName, propName);
+      }
+      else
+      {
+        makeGaugeProp(application, solver, srcName, propName);
+      }
       props[i] = propName;
     }
 }
@@ -92,20 +84,18 @@ void makeWallSource(Application &application, const std::string mom,
 
 void makeWallProp(Application &application, const std::string solver,
                   const std::string mom, const unsigned int tW,
-                  const std::string propName)
+                  const std::string propName, bool zProp)
 {
     std::string srcName = makeWallSourceName(tW, mom);
     makeWallSource(application, mom, tW, srcName);
-    makeGaugeProp(application, solver, srcName, propName);
-}
-
-void makeWallZProp(Application &application, const std::string solver,
-                   const std::string mom, const unsigned int tW,
-                   const std::string propName)
-{
-    std::string srcName = makeWallSourceName(tW, mom);
-    makeWallSource(application, mom, tW, srcName);
-    makeZGaugeProp(application, solver, srcName, propName);
+    if(zProp)
+    {
+      makeZGaugeProp(application, solver, srcName, propName);
+    }
+    else
+    {
+      makeGaugeProp(application, solver, srcName, propName);
+    }
 }
 
 void makeSmearedProp(Application &application, const std::string prop,
@@ -171,18 +161,27 @@ void makeSequentialSource(Application &application, const std::string q,
 void makeSeqProp(Application &application, const std::string solver,
                  const std::string action, const unsigned int tJ,
                  const std::string mom, const std::string propName,
-                 const std::string source, const std::string seqPropName)
+                 const std::string source, const std::string seqPropName,
+		 bool zProp)
 {
     std::string srcName = makeSeqSourceName(tJ, mom, seqPropName);
-    makeSequentialSource(application, propName, source, action, tJ, mom, srcName);
-    makeGaugeProp(application, solver, srcName, seqPropName);
+    if(zProp)
+    {
+      makeZSequentialSource(application, propName, source, action, tJ, mom, srcName);
+      makeZGaugeProp(application, solver, srcName, seqPropName);
+    }
+    else
+    {
+      makeSequentialSource(application, propName, source, action, tJ, mom, srcName);
+      makeGaugeProp(application, solver, srcName, seqPropName);
+    }
 }
 
 void makeSeqProps(Application &application, const std::string solver,
                    const std::string action, const unsigned int tJ,
                    const std::string mom, const std::vector<std::string> props,
                    const std::vector<std::string> sources, const std::string name,
-                   std::vector<std::string> &seqProps)
+                   std::vector<std::string> &seqProps, bool zProp)
 {
     std::string propName, srcName, seqPropName;
     for (unsigned int i = 0; i < props.size(); ++i)
@@ -191,35 +190,7 @@ void makeSeqProps(Application &application, const std::string solver,
       propName = props[i];
       srcName  = sources[i];
       makeSeqProp(application, solver, action, tJ, mom, propName,
-                   srcName, seqPropName);
-      seqProps[i] = seqPropName;
-    }
-}
-
-void makeSeqZProp(Application &application, const std::string solver,
-                  const std::string action, const unsigned int tJ,
-                  const std::string mom, const std::string propName,
-                  const std::string source, const std::string seqPropName)
-{
-    std::string srcName = makeSeqSourceName(tJ, mom, seqPropName);
-    makeZSequentialSource(application, propName, source, action, tJ, mom, srcName);
-    makeZGaugeProp(application, solver, srcName, seqPropName);
-}
-
-void makeSeqZProps(Application &application, const std::string solver,
-                   const std::string action, const unsigned int tJ,
-                   const std::string mom, const std::vector<std::string> props,
-                   const std::vector<std::string> sources, const std::string name,
-                   std::vector<std::string> &seqProps)
-{
-    std::string propName, srcName, seqPropName;
-    for (unsigned int i = 0; i < props.size(); ++i)
-    {
-      seqPropName = name + "_" + std::to_string(i);
-      propName = props[i];
-      srcName  = sources[i];
-      makeSeqZProp(application, solver, action, tJ, mom, propName,
-                   srcName, seqPropName);
+                   srcName, seqPropName, zProp);
       seqProps[i] = seqPropName;
     }
 }
