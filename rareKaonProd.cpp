@@ -351,11 +351,8 @@ int main(int argc, char *argv[])
     gaugeFixPar.gauge = "gauge";
     gaugeFixPar.alpha = 0.05;
     gaugeFixPar.maxiter = 1000000;
-    //just temporarily to run on laptop
-    //gaugeFixPar.Omega_tol = 1e-8;
-    //gaugeFixPar.Phi_tol = 1e-8;
-    gaugeFixPar.Omega_tol = 1e-2;
-    gaugeFixPar.Phi_tol = 1e-2;
+    gaugeFixPar.Omega_tol = 1e-8;
+    gaugeFixPar.Phi_tol = 1e-8;
     gaugeFixPar.gaugeFix = Grid::Hadrons::MGauge::Fix::coulomb;
     gaugeFixPar.Fourier = true;
     application.createModule<MGauge::GaugeFix>("gaugeFix", gaugeFixPar);
