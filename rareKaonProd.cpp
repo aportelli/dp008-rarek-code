@@ -124,7 +124,9 @@ namespace RareKaonInputs
                                         double, residual,
                                         double, loopResidual,
                                         double, innerMADWFResidual,
-                                        double, outerMADWFResidual);
+                                        double, outerMADWFResidual,
+                                        double, loopInnerMADWFResidual,
+                                        double, loopOuterMADWFResidual);
     };
 
     class CharmActionPar : Serializable
@@ -320,6 +322,16 @@ int main(int argc, char *argv[])
                                               par.charm1ActionPar.outerMADWFResidual,
                                               par.charm2ActionPar.outerMADWFResidual,
                                               par.charm3ActionPar.outerMADWFResidual};
+    std::vector<double> loopInnerMADWFResidual = {par.strangeActionPar.residual,
+                                              par.lightActionPar.loopInnerMADWFResidual,
+                                              par.charm1ActionPar.residual,
+                                              par.charm2ActionPar.residual,
+                                              par.charm3ActionPar.residual};
+    std::vector<double> loopOuterMADWFResidual = {par.strangeActionPar.residual,
+                                              par.lightActionPar.loopOuterMADWFResidual,
+                                              par.charm1ActionPar.residual,
+                                              par.charm2ActionPar.residual,
+                                              par.charm3ActionPar.residual};
     std::vector<unsigned int> Ls = {par.strangeActionPar.Ls,
                                     par.zMobiusPar.Ls};
     std::vector<double> M5 = {par.strangeActionPar.M5,
@@ -476,8 +488,8 @@ int main(int argc, char *argv[])
         MADWFActionPar.maxInnerIteration = 30000;
         MADWFActionPar.maxOuterIteration = 100;
         MADWFActionPar.maxPVIteration = 30000;
-        MADWFActionPar.innerResidual = innerMADWFResidual[1];
-        MADWFActionPar.outerResidual = outerMADWFResidual[1];
+        MADWFActionPar.innerResidual = loopInnerMADWFResidual[1];
+        MADWFActionPar.outerResidual = loopOuterMADWFResidual[1];
         MADWFActionPar.eigenPack = epack[1];
         application.createModule<MSolver::ZMADWFMixedPrecCG>("mcg_" + flavour[1], MADWFActionPar); 
     }
