@@ -369,13 +369,27 @@ int main(int argc, char *argv[])
 
     if (!(par.ioPar.epackFile.empty()))
     {
-        MIO::LoadFermionEigenPackIo32::Par epackPar;
-        epackPar.filestem = par.ioPar.epackFile;
-        epackPar.multiFile = par.ioPar.epackMultiFile;
-        epackPar.size = par.ioPar.epackSize;
-        epackPar.Ls = par.ioPar.epackLs;
-        epackPar.gaugeXform = "gaugeFix_xform";
-        application.createModule<MIO::LoadFermionEigenPackIo32>("epack_l", epackPar);
+        // MADWF mixed precision uses a single-precision eigenPack
+        if(useMADWF)
+        {
+            MIO::LoadFermionEigenPackF::Par epackPar;
+            epackPar.filestem = par.ioPar.epackFile;
+            epackPar.multiFile = par.ioPar.epackMultiFile;
+            epackPar.size = par.ioPar.epackSize;
+            epackPar.Ls = par.ioPar.epackLs;
+            epackPar.gaugeXform = "gaugeFix_xform";
+            application.createModule<MIO::LoadFermionEigenPackF>("epack_l", epackPar);
+	}
+	else
+	{
+            MIO::LoadFermionEigenPackIo32::Par epackPar;
+            epackPar.filestem = par.ioPar.epackFile;
+            epackPar.multiFile = par.ioPar.epackMultiFile;
+            epackPar.size = par.ioPar.epackSize;
+            epackPar.Ls = par.ioPar.epackLs;
+            epackPar.gaugeXform = "gaugeFix_xform";
+            application.createModule<MIO::LoadFermionEigenPackIo32>("epack_l", epackPar);
+	}
     }
     else
     {
@@ -447,7 +461,7 @@ int main(int argc, char *argv[])
             application.createModule<MAction::ScaledDWF>("dwf_" + flavour[i], MobActionPar);
     
             //MADWF solver light
-            MSolver::ZMADWFCG::Par MADWFPar;
+            MSolver::ZMADWFMixedPrecCG::Par MADWFPar;
             MADWFPar.innerAction = "dwff_" + flavour[i];
             MADWFPar.outerAction = "dwf_" + flavour[i];
             MADWFPar.maxInnerIteration = 30000;
@@ -456,10 +470,10 @@ int main(int argc, char *argv[])
             MADWFPar.innerResidual = innerMADWFResidual[i]; //innerLoopRes!!!
             MADWFPar.outerResidual = outerMADWFResidual[i];
             MADWFPar.eigenPack = epack[i];
-            application.createModule<MSolver::ZMADWFCG>("loopMcg_" + flavour[i], MADWFPar);     
+            application.createModule<MSolver::ZMADWFMixedPrecCG>("loopMcg_" + flavour[i], MADWFPar);     
         }
         // Solver (non-loop): light
-        MSolver::ZMADWFCG::Par MADWFActionPar;
+        MSolver::ZMADWFMixedPrecCG::Par MADWFActionPar;
         MADWFActionPar.innerAction = "dwff_" + flavour[1];
         MADWFActionPar.outerAction = "dwf_" + flavour[1];
         MADWFActionPar.maxInnerIteration = 30000;
@@ -468,7 +482,7 @@ int main(int argc, char *argv[])
         MADWFActionPar.innerResidual = innerMADWFResidual[1];
         MADWFActionPar.outerResidual = outerMADWFResidual[1];
         MADWFActionPar.eigenPack = epack[1];
-        application.createModule<MSolver::ZMADWFCG>("mcg_" + flavour[1], MADWFActionPar); 
+        application.createModule<MSolver::ZMADWFMixedPrecCG>("mcg_" + flavour[1], MADWFActionPar); 
     }
     // Mixed Precision
     else
