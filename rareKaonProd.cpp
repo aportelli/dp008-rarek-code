@@ -155,6 +155,8 @@ namespace RareKaonInputs
     public:
         GRID_SERIALIZABLE_CLASS_MEMBERS(MADWFPar,
                                         bool,         useMADWF,
+                                        unsigned int, Ls,
+                                        double,       M5,
                                         double,       scale);
     };
     
@@ -461,8 +463,8 @@ int main(int argc, char *argv[])
             //outer action: Mobius double precision
             MAction::ScaledDWF::Par MobActionPar;
             MobActionPar.gauge = "gaugeFix";
-            MobActionPar.Ls = Ls[1];
-            MobActionPar.M5 = M5[1];
+            MobActionPar.Ls = par.MADWFPar.Ls;
+            MobActionPar.M5 = par.MADWFPar.M5;
             MobActionPar.mass = mass[i];
             MobActionPar.boundary = boundary;
             MobActionPar.scale = par.MADWFPar.scale; 
