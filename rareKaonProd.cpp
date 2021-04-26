@@ -122,7 +122,11 @@ namespace RareKaonInputs
         GRID_SERIALIZABLE_CLASS_MEMBERS(LightActionPar,
                                         double, mass,
                                         double, residual,
-                                        double, loopResidual);
+                                        double, loopResidual,
+                                        double, innerMADWFResidual,
+                                        double, outerMADWFResidual,
+                                        double, loopInnerMADWFResidual,
+                                        double, loopOuterMADWFResidual);
     };
 
     class CharmActionPar : Serializable
@@ -130,7 +134,9 @@ namespace RareKaonInputs
     public:
         GRID_SERIALIZABLE_CLASS_MEMBERS(CharmActionPar,
                                         double, mass,
-                                        double, residual);
+                                        double, residual,
+                                        double, innerMADWFResidual,
+                                        double, outerMADWFResidual);
     };
 
     class StrangeActionPar : Serializable
@@ -143,6 +149,17 @@ namespace RareKaonInputs
                                         double,       scale,
                                         double,       residual);
     };
+
+    class MADWFPar : Serializable
+    {
+    public:
+        GRID_SERIALIZABLE_CLASS_MEMBERS(MADWFPar,
+                                        bool,         useMADWF,
+                                        unsigned int, Ls,
+                                        double,       M5,
+                                        double,       scale);
+    };
+    
 } // namespace RareKaonInputs
 
 struct RareKaonPar
@@ -162,6 +179,7 @@ struct RareKaonPar
     RareKaonInputs::MomPar           momPar;
     RareKaonInputs::DbPar            dbPar;
     RareKaonInputs::IOPar            ioPar;
+    RareKaonInputs::MADWFPar         MADWFPar;
 };
 int main(int argc, char *argv[])
 {
@@ -196,6 +214,17 @@ int main(int argc, char *argv[])
     read(reader,           "momPar",           par.momPar);
     read(reader,            "dbPar",            par.dbPar);
     read(reader,            "ioPar",            par.ioPar);
+    read(reader,         "madwfPar",         par.MADWFPar);
+  
+    bool useMADWF = par.MADWFPar.useMADWF;
+    if(useMADWF)
+    {
+        LOG(Message) << "using MADWF action" << std::endl;
+    }
+    else
+    {
+        LOG(Message) << "using ZMobius action" << std::endl;
+    }
 
     unsigned int dt  = par.timePar.dt;
     unsigned int dtK = par.timePar.dtK;
@@ -285,6 +314,26 @@ int main(int argc, char *argv[])
                                         par.charm1ActionPar.residual,
                                         par.charm2ActionPar.residual,
                                         par.charm3ActionPar.residual};
+    std::vector<double> innerMADWFResidual = {par.strangeActionPar.residual,
+                                              par.lightActionPar.innerMADWFResidual,
+                                              par.charm1ActionPar.innerMADWFResidual,
+                                              par.charm2ActionPar.innerMADWFResidual,
+                                              par.charm3ActionPar.innerMADWFResidual};
+    std::vector<double> outerMADWFResidual = {par.strangeActionPar.residual,
+                                              par.lightActionPar.outerMADWFResidual,
+                                              par.charm1ActionPar.outerMADWFResidual,
+                                              par.charm2ActionPar.outerMADWFResidual,
+                                              par.charm3ActionPar.outerMADWFResidual};
+    std::vector<double> loopInnerMADWFResidual = {par.strangeActionPar.residual,
+                                              par.lightActionPar.loopInnerMADWFResidual,
+                                              par.charm1ActionPar.residual,
+                                              par.charm2ActionPar.residual,
+                                              par.charm3ActionPar.residual};
+    std::vector<double> loopOuterMADWFResidual = {par.strangeActionPar.residual,
+                                              par.lightActionPar.loopOuterMADWFResidual,
+                                              par.charm1ActionPar.residual,
+                                              par.charm2ActionPar.residual,
+                                              par.charm3ActionPar.residual};
     std::vector<unsigned int> Ls = {par.strangeActionPar.Ls,
                                     par.zMobiusPar.Ls};
     std::vector<double> M5 = {par.strangeActionPar.M5,
@@ -292,6 +341,7 @@ int main(int argc, char *argv[])
     std::string boundary = "1 1 1 -1";
     std::string twist = "0. 0. 0. 0.";
     unsigned int nt = GridDefaultLatt()[Tp];
+    
 
     // gauge field
     if (!(par.ioPar.gaugeFile.empty()))
@@ -330,13 +380,27 @@ int main(int argc, char *argv[])
 
     if (!(par.ioPar.epackFile.empty()))
     {
-        MIO::LoadFermionEigenPackIo32::Par epackPar;
-        epackPar.filestem = par.ioPar.epackFile;
-        epackPar.multiFile = par.ioPar.epackMultiFile;
-        epackPar.size = par.ioPar.epackSize;
-        epackPar.Ls = par.ioPar.epackLs;
-        epackPar.gaugeXform = "gaugeFix_xform";
-        application.createModule<MIO::LoadFermionEigenPackIo32>("epack_l", epackPar);
+        // MADWF mixed precision uses a single-precision eigenPack
+        if(useMADWF)
+        {
+            MIO::LoadFermionEigenPackF::Par epackPar;
+            epackPar.filestem = par.ioPar.epackFile;
+            epackPar.multiFile = par.ioPar.epackMultiFile;
+            epackPar.size = par.ioPar.epackSize;
+            epackPar.Ls = par.ioPar.epackLs;
+            epackPar.gaugeXform = "gaugeFix_xform";
+            application.createModule<MIO::LoadFermionEigenPackF>("epack_l", epackPar);
+	}
+	else
+	{
+            MIO::LoadFermionEigenPackIo32::Par epackPar;
+            epackPar.filestem = par.ioPar.epackFile;
+            epackPar.multiFile = par.ioPar.epackMultiFile;
+            epackPar.size = par.ioPar.epackSize;
+            epackPar.Ls = par.ioPar.epackLs;
+            epackPar.gaugeXform = "gaugeFix_xform";
+            application.createModule<MIO::LoadFermionEigenPackIo32>("epack_l", epackPar);
+	}
     }
     else
     {
@@ -375,22 +439,9 @@ int main(int argc, char *argv[])
     solverParStrange.eigenPack = epack[0];
     application.createModule<MSolver::MixedPrecisionRBPrecCG>("mcg_" + flavour[0], solverParStrange);
 
-
-    // Zmobius action for loops: light, charm1, charm2, charm3
+    // inner action used both for Mixed Precision and MADWF
     for (unsigned int i = 1; i < flavour.size(); ++i)
     {
-        MAction::ZMobiusDWF::Par ZMobActionPar;
-        ZMobActionPar.gauge = "gaugeFix";
-        ZMobActionPar.Ls = Ls[1];
-        ZMobActionPar.M5 = M5[1];
-        ZMobActionPar.mass = mass[i];
-        ZMobActionPar.boundary = boundary;
-        ZMobActionPar.b = par.zMobiusPar.b;
-        ZMobActionPar.c = par.zMobiusPar.c;
-        ZMobActionPar.omega = par.zMobiusPar.omega;
-        ZMobActionPar.twist = twist;
-        application.createModule<MAction::ZMobiusDWF>("dwf_" + flavour[i], ZMobActionPar);
-
         // actionF light
         MAction::ZMobiusDWFF::Par ZMobFAction;
         ZMobFAction.gauge = "gaugefFix";
@@ -403,28 +454,85 @@ int main(int argc, char *argv[])
         ZMobFAction.omega = par.zMobiusPar.omega;
         ZMobFAction.twist = twist;
         application.createModule<MAction::ZMobiusDWFF>("dwff_" + flavour[i], ZMobFAction);
-
-        // solver light
+    }
+    // MADWF
+    if(useMADWF)
+    {
+        for (unsigned int i = 1; i < flavour.size(); ++i)
+        {
+            //outer action: Mobius double precision
+            MAction::ScaledDWF::Par MobActionPar;
+            MobActionPar.gauge = "gaugeFix";
+            MobActionPar.Ls = par.MADWFPar.Ls;
+            MobActionPar.M5 = par.MADWFPar.M5;
+            MobActionPar.mass = mass[i];
+            MobActionPar.boundary = boundary;
+            MobActionPar.scale = par.MADWFPar.scale; 
+            MobActionPar.twist = twist;
+            application.createModule<MAction::ScaledDWF>("dwf_" + flavour[i], MobActionPar);
+    
+            //MADWF solver light
+            MSolver::ZMADWFMixedPrecCG::Par MADWFPar;
+            MADWFPar.innerAction = "dwff_" + flavour[i];
+            MADWFPar.outerAction = "dwf_" + flavour[i];
+            MADWFPar.maxInnerIteration = 30000;
+            MADWFPar.maxOuterIteration = 100;
+            MADWFPar.maxPVIteration = 30000;
+            MADWFPar.innerResidual = innerMADWFResidual[i]; //innerLoopRes!!!
+            MADWFPar.outerResidual = outerMADWFResidual[i];
+            MADWFPar.eigenPack = epack[i];
+            application.createModule<MSolver::ZMADWFMixedPrecCG>("loopMcg_" + flavour[i], MADWFPar);     
+        }
+        // Solver (non-loop): light
+        MSolver::ZMADWFMixedPrecCG::Par MADWFActionPar;
+        MADWFActionPar.innerAction = "dwff_" + flavour[1];
+        MADWFActionPar.outerAction = "dwf_" + flavour[1];
+        MADWFActionPar.maxInnerIteration = 30000;
+        MADWFActionPar.maxOuterIteration = 100;
+        MADWFActionPar.maxPVIteration = 30000;
+        MADWFActionPar.innerResidual = loopInnerMADWFResidual[1];
+        MADWFActionPar.outerResidual = loopOuterMADWFResidual[1];
+        MADWFActionPar.eigenPack = epack[1];
+        application.createModule<MSolver::ZMADWFMixedPrecCG>("mcg_" + flavour[1], MADWFActionPar); 
+    }
+    // Mixed Precision
+    else
+    {
+        for (unsigned int i = 1; i < flavour.size(); ++i)
+        {
+            MAction::ZMobiusDWF::Par ZMobActionPar;
+            ZMobActionPar.gauge = "gaugeFix";
+            ZMobActionPar.Ls = Ls[1];
+            ZMobActionPar.M5 = M5[1];
+            ZMobActionPar.mass = mass[i];
+            ZMobActionPar.boundary = boundary;
+            ZMobActionPar.b = par.zMobiusPar.b;
+            ZMobActionPar.c = par.zMobiusPar.c;
+            ZMobActionPar.omega = par.zMobiusPar.omega;
+            ZMobActionPar.twist = twist;
+            application.createModule<MAction::ZMobiusDWF>("dwf_" + flavour[i], ZMobActionPar);
+    
+            // solver light
+            MSolver::ZMixedPrecisionRBPrecCG::Par ZMobSolverPar;
+            ZMobSolverPar.innerAction = "dwff_" + flavour[i];
+            ZMobSolverPar.outerAction = "dwf_" + flavour[i];
+            ZMobSolverPar.residual = loopResidual[i];
+            ZMobSolverPar.maxInnerIteration = 30000;
+            ZMobSolverPar.maxOuterIteration = 100;
+            ZMobSolverPar.eigenPack = epack[i];
+            application.createModule<MSolver::ZMixedPrecisionRBPrecCG>("loopMcg_" + flavour[i], ZMobSolverPar);
+    
+        }
+        // Solver (non-loop): light
         MSolver::ZMixedPrecisionRBPrecCG::Par ZMobSolverPar;
-        ZMobSolverPar.innerAction = "dwff_" + flavour[i];
-        ZMobSolverPar.outerAction = "dwf_" + flavour[i];
-        ZMobSolverPar.residual = loopResidual[i];
+        ZMobSolverPar.innerAction = "dwff_" + flavour[1];
+        ZMobSolverPar.outerAction = "dwf_" + flavour[1];
+        ZMobSolverPar.residual = residual[1];
         ZMobSolverPar.maxInnerIteration = 30000;
         ZMobSolverPar.maxOuterIteration = 100;
-        ZMobSolverPar.eigenPack = epack[i];
-        application.createModule<MSolver::ZMixedPrecisionRBPrecCG>("loopMcg_" + flavour[i], ZMobSolverPar);
-
+        ZMobSolverPar.eigenPack = epack[1];
+        application.createModule<MSolver::ZMixedPrecisionRBPrecCG>("mcg_" + flavour[1], ZMobSolverPar);
     }
-
-    // Solver (non-loop): light
-    MSolver::ZMixedPrecisionRBPrecCG::Par ZMobSolverPar;
-    ZMobSolverPar.innerAction = "dwff_" + flavour[1];
-    ZMobSolverPar.outerAction = "dwf_" + flavour[1];
-    ZMobSolverPar.residual = residual[1];
-    ZMobSolverPar.maxInnerIteration = 30000;
-    ZMobSolverPar.maxOuterIteration = 100;
-    ZMobSolverPar.eigenPack = epack[1];
-    application.createModule<MSolver::ZMixedPrecisionRBPrecCG>("mcg_" + flavour[1], ZMobSolverPar);
 
     // Sparse Noise Sources
     unsigned int nsrc = 1, nsparse = 2, nds = nsrc*pow(nsparse, 4);
@@ -463,7 +571,7 @@ int main(int argc, char *argv[])
             std::string solver = "loopMcg_" + flavour[i];
             std::string sparsePropName = "sparseProps_" + std::to_string(h) + "_" + flavour[i];
 
-            makeZGaugeProps(application, solver, unpackedNoises[hInd], sparsePropName, sparseProps[hInd][i]);
+            makeGaugeProps(application, solver, unpackedNoises[hInd], sparsePropName, sparseProps[hInd][i],!useMADWF);
             makeLoops(application, sparseProps[hInd][i], unpackedNoises[hInd], sparseLoops[hInd][i]);
         }
     }
@@ -542,11 +650,11 @@ int main(int argc, char *argv[])
         //////////////////////////////////////////////////
         // Zero momentum
         std::string qWallksZeromom = "QWall_s_0mom_" + stk;
-        makeWallProp(application, strangeSolver, kmom, tk, qWallksZeromom);
+        makeWallProp(application, strangeSolver, kmom, tk, qWallksZeromom, 0);
         std::string qWallklZeromom = "QWall_l_0mom_" + stk;
-        makeWallZProp(application, lightSolver, kmom, tk, qWallklZeromom);
+        makeWallProp(application, lightSolver, kmom, tk, qWallklZeromom, !useMADWF);
         std::string qWallplZeromom = "QWall_l_0mom_" + stp;
-        makeWallZProp(application, lightSolver, kmom, tp, qWallplZeromom);
+        makeWallProp(application, lightSolver, kmom, tp, qWallplZeromom, !useMADWF);
 
         // Smeared propagators: sink zero mom
         std::string smearedqWallksZeromom = "smearedQWall_s_0mom_" + stk;
@@ -558,9 +666,9 @@ int main(int argc, char *argv[])
 
         // Nonzero momentum
         std::string qWallksPmom = "QWall_s_Pmom_" + stk;
-        makeWallProp(application, strangeSolver, pmom, tk, qWallksPmom);
+        makeWallProp(application, strangeSolver, pmom, tk, qWallksPmom,0);
         std::string qWallplbarPmom = "QWall_l_Pmom_" + stp;
-        makeWallZProp(application, lightSolver, pmom, tp, qWallplbarPmom);
+        makeWallProp(application, lightSolver, pmom, tp, qWallplbarPmom, !useMADWF);
 
         // Smeared propagators
         // sink zero momentum
@@ -581,17 +689,17 @@ int main(int argc, char *argv[])
         std::string wallSourcePmomK = makeWallSourceName(tp, kmom);
         std::string wallSourcePmomP = makeWallSourceName(tp, pmom);
         std::string seqVcKLQmom = "VC" + smu + "_KL_" + qWallklZeromom;
-        makeSeqZProp(application, lightSolver, lightAction, 
-                     tj, qmom, qWallklZeromom, wallSourceKmomK, seqVcKLQmom);
+        makeSeqProp(application, lightSolver, lightAction, 
+                     tj, qmom, qWallklZeromom, wallSourceKmomK, seqVcKLQmom, !useMADWF);
         std::string seqVcKSMqmom = "VC" + smu + "_KS_" + qWallksZeromom;
         makeSeqProp(application, strangeSolver, strangeAction,
-                    tj, mqmom, qWallksZeromom, wallSourceKmomK, seqVcKSMqmom);
+                    tj, mqmom, qWallksZeromom, wallSourceKmomK, seqVcKSMqmom, 0);
         std::string seqVcPLMqmom = "VC" + smu + "_PL_" + qWallplZeromom;
-        makeSeqZProp(application, lightSolver, lightAction,
-                     tj, mqmom, qWallplZeromom, wallSourcePmomK, seqVcPLMqmom);
+        makeSeqProp(application, lightSolver, lightAction,
+                     tj, mqmom, qWallplZeromom, wallSourcePmomK, seqVcPLMqmom, !useMADWF);
         std::string seqVcPLbarQmom = "VC" + smu + "_PLbar_" + qWallplbarPmom;
-        makeSeqZProp(application, lightSolver, lightAction,
-                     tj, qmom, qWallplbarPmom, wallSourcePmomP, seqVcPLbarQmom);
+        makeSeqProp(application, lightSolver, lightAction,
+                     tj, qmom, qWallplbarPmom, wallSourcePmomP, seqVcPLbarQmom, !useMADWF);
 
         // Smeared sequential propagators
         // sink zero momentum
@@ -899,7 +1007,7 @@ int main(int argc, char *argv[])
                 std::string seqSparsePropName = "seqSparseProp_" + std::to_string(h)
                                              + "_" + flavour[i] + "_" + timeStamp;
 
-                makeSeqZProps(application, solver, action, tj, qmom, sparseProps[hInd][i], unpackedNoises[hInd], seqSparsePropName, seqSparseProps[hInd][i]);
+                makeSeqProps(application, solver, action, tj, qmom, sparseProps[hInd][i], unpackedNoises[hInd], seqSparsePropName, seqSparseProps[hInd][i], !useMADWF);
                 makeLoops(application, seqSparseProps[hInd][i], unpackedNoises[hInd], seqSparseLoops[hInd][i]);
             }
         }
@@ -944,7 +1052,6 @@ int main(int argc, char *argv[])
             }
         }
     }
-
     if(populateResultDb)
     {
         LOG(Message) << "Populating result dabatase..." << std::endl;
