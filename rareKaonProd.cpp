@@ -54,6 +54,7 @@ namespace RareKaonInputs
     {
     public:
         GRID_SERIALIZABLE_CLASS_MEMBERS(TimePar,
+                                        unsigned int, nt,
                                         unsigned int, dt,
                                         unsigned int, dtK,
                                         unsigned int, dtJ,
@@ -234,6 +235,7 @@ int main(int argc, char *argv[])
     unsigned int nHits     = par.noisePar.nHits;
     unsigned int hitFloor  = par.noisePar.hitFloor;
     unsigned int hitRoof   = hitFloor + nHits;
+    bool exactHit = ((nHits==1) && (hitFloor==0));
 
     std::string kmom  = par.momPar.kmom;
     std::string pmom  = par.momPar.pmom;
@@ -341,7 +343,7 @@ int main(int argc, char *argv[])
     std::string boundary = "1 1 1 -1";
     std::string twist = "0. 0. 0. 0.";
     unsigned int nt = GridDefaultLatt()[Tp];
-    
+    if (populateResultDb) nt = par.timePar.nt;
 
     // gauge field
     if (!(par.ioPar.gaugeFile.empty()))
@@ -593,10 +595,12 @@ int main(int argc, char *argv[])
         {
             std::string loop = sparseLoops[hInd][i][j];
             std::string sparseName = flavour[i] + "_" + std::to_string(h) + "_" + std::to_string(j);
+            if (exactHit) sparseName = flavour[i] + "_" + std::to_string(j);
             std::string resDiscLoop = resultStem + "/disc/disc_"
                                       + sDiscMom[m] + "_" + sparseName;
             std::string discLoop = "disc_" + sDiscMom[m] + "_" + sparseName;
             auto dlVcEntry = makeDiscLoopEntry(vDiscMom[m], flavour[i], h, j);
+            if (exactHit) dlVcEntry = makeDiscLoopEntry(vDiscMom[m], flavour[i], -1, j, true);
             makeDiscLoop(application, loop, discMom[m], resDiscLoop, discLoop,
                          dlVcEntry, "Disconnected");
         }
@@ -947,12 +951,14 @@ int main(int argc, char *argv[])
             {
                 std::string loop3pt = sparseLoops[hInd][i][j];
                 std::string sparseName = flavour[i] + "_" + std::to_string(h) + "_" + std::to_string(j);
+                if (exactHit) sparseName = flavour[i] + "_" + std::to_string(j);
                 // 3pt Contractions
                 // Kaon momentum
                 std::string resWHE3ptKmom = resultStem + "/3pt/HW/3pt_HW_Eye_" + sparseName
                                             + "_mom" + sKMom +"_tK_" + timeStamp;
                 std::string WHE3ptKmom = "WHE_Kmom_" + sparseName + "_tk_" +  stk;
                 auto weK3ptEntry = makeEntry3ptHw(tk, tp, "E", vKMom, flavour[i], h, j);
+                if (exactHit) weK3ptEntry = makeEntry3ptHw(tk, tp, "E", vKMom, flavour[i], -1, j, true);
                 makeWeakEye(application, qWallksZeromom, qWallplZeromom, smearedqWallklZeromom, loop3pt,
                             gammaIn, gammaOut, tp, resWHE3ptKmom, WHE3ptKmom,
                             weK3ptEntry, "Three_point_Hw");
@@ -961,6 +967,7 @@ int main(int argc, char *argv[])
                                                + "_mom" + sPMom + "_tK_" + timeStamp;
                 std::string WHE3ptPmom = "WHE_Pmom_" + sparseName + "_tk_" +  stk;
                 auto weP3ptEntry = makeEntry3ptHw(tk, tp, "E", vPMom, flavour[i], h, j);
+                if (exactHit) weP3ptEntry = makeEntry3ptHw(tk, tp, "E", vPMom, flavour[i], -1, j, true);
                 makeWeakEye(application, qWallksPmom, qWallplbarPmom, smearedqWallklZeromom, loop3pt,
                             gammaIn, gammaOut, tp, resWHE3ptPmom, WHE3ptPmom,
                             weP3ptEntry, "Three_point_Hw");
@@ -971,6 +978,7 @@ int main(int argc, char *argv[])
                                                + "_VC" + smu + "_spec_tK_" + timeStamp;
                 std::string WHE4ptVcspec = "4pt_VC" + smu + "_Eye_" + sparseName + "_spec_" + stk;
                 auto weL4ptEntry = makeEntry4pt(baseEntry, "E_l", flavour[i], h, j);
+                if (exactHit) weL4ptEntry = makeEntry4pt(baseEntry, "E_l", flavour[i], -1, j, true);
                 makeWeakEye(application, qWallksZeromom, qWallplbarPmom, smearedqWallVcKspecQmom, loop3pt,
                             gammaIn, gammaOut, tp, resWHE4ptVcspec, WHE4ptVcspec,
                             weL4ptEntry, "Four_point");
@@ -980,6 +988,7 @@ int main(int argc, char *argv[])
                                                + "_VC" + smu + "_KS_tK_" + timeStamp;
                 std::string WHE4ptVcKS = "4pt_VC" + smu + "_Eye_" + sparseName + "_KS_" + stk;
                 auto weKS4ptEntry = makeEntry4pt(baseEntry, "E_Ksbar", flavour[i], h, j);
+                if (exactHit) weKS4ptEntry = makeEntry4pt(baseEntry, "E_Ksbar", flavour[i], -1, j, true);
                 makeWeakEye(application, seqVcKSMqmom, qWallplbarPmom, smearedqWallklZeromom, loop3pt,
                             gammaIn, gammaOut, tp, resWHE4ptVcKS, WHE4ptVcKS,
                             weKS4ptEntry, "Four_point");
@@ -989,6 +998,7 @@ int main(int argc, char *argv[])
                                                + "_VC" + smu + "_PLbar_tK_" + timeStamp;
                 std::string WHE4ptVcKLbar = "4pt_VC" + smu + "_Eye_" + sparseName + "_KLbar_" + stk;
                 auto wePiLbar4ptEntry = makeEntry4pt(baseEntry, "E_PiLbar", flavour[i], h, j);
+                if (exactHit) wePiLbar4ptEntry = makeEntry4pt(baseEntry, "E_PiLbar", flavour[i], -1, j, true);
                 makeWeakEye(application, qWallksZeromom, seqVcPLbarQmom, smearedqWallklZeromom, loop3pt,
                             gammaIn, gammaOut, tp, resWHE4ptVcKLbar, WHE4ptVcKLbar,
                             wePiLbar4ptEntry, "Four_point");
@@ -1020,11 +1030,13 @@ int main(int argc, char *argv[])
             {
                 std::string seqLoop = seqSparseLoops[hInd][i][j];
                 std::string sparseName = flavour[i] + "_" + std::to_string(h) + "_" + std::to_string(j);
+                if (exactHit) sparseName = flavour[i] + "_" + std::to_string(j);
 
                 std::string resWHE4ptVcLoop = resultStem + "/4pt/RK/4pt_Eye_" + sparseName
                                           + "_VC" + smu + "_Loop_tK_" + timeStamp;
                 std::string WHE4ptVcLoop = "4pt_VC" + smu + "_Eye_Loop_" + sparseName + "_tK_" + stk;
                 auto weLoop4ptEntry = makeEntry4pt(baseEntry, "E_loop", flavour[i], h, j);
+                if (exactHit) weLoop4ptEntry = makeEntry4pt(baseEntry, "E_loop", flavour[i], -1, j, true);
                 makeWeakEye(application, qWallksZeromom, qWallplbarPmom, smearedqWallklZeromom, seqLoop,
                             gammaIn, gammaOut, tp, resWHE4ptVcLoop, WHE4ptVcLoop,
                             weLoop4ptEntry, "Four_point");
@@ -1042,10 +1054,12 @@ int main(int argc, char *argv[])
             {
                 std::string loop = sparseLoops[hInd][i][j];
                 std::string sparseName = flavour[i] + "_" + std::to_string(h) + "_" + std::to_string(j);
+                if (exactHit) sparseName = flavour[i] + "_" + std::to_string(j);
                 std::string resDisc0Loop = resultStem + "/4pt/disc0/disc0_VC" + smu
                                            + "_" + sparseName + "mom" + sPMom + "_tK_" + timeStamp;
                 std::string disc0Loop = "disc0_VC" + smu + "_" + sparseName + "_tK_" + stk;
                 auto pi04ptEntry = makeEntry4pt(baseEntry, "pi0", flavour[i], h, j);
+                if (exactHit) pi04ptEntry = makeEntry4pt(baseEntry, "pi0", flavour[i], -1, j, true);
                 makeRareKaonNeutralDisc(application, qWallklZeromom, qWallksZeromom,
                                         seqVcPLbarQmom, loop, resDisc0Loop, disc0Loop,
                                         pi04ptEntry, "Four_point");

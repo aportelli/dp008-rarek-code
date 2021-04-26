@@ -152,20 +152,22 @@ struct DiscLoopEntry: public SqlEntry
 {
     HADRONS_SQL_FIELDS(SqlNotNull<std::vector<double>>, mom,
                        SqlNotNull<std::string>,         flavor,
-                       SqlNotNull<int>,                 hit,
-                       SqlNotNull<int>,                 noise);
+                       int,                             hit,
+                       int,                             noise);
 };
 
 DiscLoopEntry makeDiscLoopEntry(std::vector<double> mom,
                                 std::string         flavor,
                                 int                 hit,
-                                int                 noise)
+                                int                 noise,
+                                bool                nullHit=false)
 {
     DiscLoopEntry entryDL;
     entryDL.mom    = mom;
     entryDL.flavor = flavor;
     entryDL.hit    = hit;
     entryDL.noise  = noise;
+    entryDL.nullify.hit = nullHit;
 
     return entryDL; 
 }
