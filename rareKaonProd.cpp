@@ -385,12 +385,17 @@ int main(int argc, char *argv[])
         // MADWF mixed precision uses a single-precision eigenPack
         if(useMADWF)
         {
+            // gauge field cast
+            MUtilities::ColourMatrixSinglePrecisionCast::Par gaugefXformPar;
+            gaugefXformPar.field = "gaugeFix_xform";
+            application.createModule<MUtilities::ColourMatrixSinglePrecisionCast>("gaugefFix_xform", gaugefXformPar);
+
             MIO::LoadFermionEigenPackF::Par epackPar;
             epackPar.filestem = par.ioPar.epackFile;
             epackPar.multiFile = par.ioPar.epackMultiFile;
             epackPar.size = par.ioPar.epackSize;
             epackPar.Ls = par.ioPar.epackLs;
-            epackPar.gaugeXform = "gaugeFix_xform";
+            epackPar.gaugeXform = "gaugefFix_xform";
             application.createModule<MIO::LoadFermionEigenPackF>("epack_l", epackPar);
 	}
 	else
