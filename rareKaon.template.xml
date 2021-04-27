@@ -9,23 +9,24 @@
         <step>@ts@</step>
     </trajRange>
     <geneticPar>
-      <popSize>@popSize@</popSize>
-      <maxGen>@maxGen@</maxGen>
-      <maxCstGen>@maxCstGen@</maxCstGen>
+      <popSize>20</popSize>
+      <maxGen>1000</maxGen>
+      <maxCstGen>100</maxCstGen>
       <mutationRate>0.1</mutationRate>
     </geneticPar>
     <dbPar>
-        <applicationDb>rareK@pmom@App.db</applicationDb>
-        <resultDb>rareKaonResults.db</resultDb>
-        <createProfile>@createProf@</createProfile>
-        <createSchedule>@createSched@</createSchedule>
+        <applicationDb>@dbName@App.db</applicationDb>
+        <resultDb>./database/rareKaon@nHits@HitsResults-@ti@-@pmom@.db</resultDb>
+        <createProfile>false</createProfile>
+        <createSchedule>false</createSchedule>
         <restoreSchedule>@resSched@</restoreSchedule>
-        <restoreModules>@resMod@</restoreModules>
-        <restoreMemoryProfile>@resMem@</restoreMemoryProfile>
+        <restoreModules>false</restoreModules>
+        <restoreMemoryProfile>false</restoreMemoryProfile>
         <makeStatDb>true</makeStatDb>
         <populateResultDb>false</populateResultDb>
     </dbPar>
     <timePar>
+        <nt>@nt@</nt>
         <dt>@dt@</dt>
         <dtK>@dtK@</dtK>
         <dtJ>@dtJ@</dtJ>
@@ -57,9 +58,16 @@
         <epackSize>2000</epackSize>
         <epackLs>10</epackLs>
         <epackMultiFile>true</epackMultiFile>
-        <resultStem>./result/k000_p@pmom@/</resultStem>
+        <resultStem>./result/k000_p@pmom@/@resStem@</resultStem>
         <xmlFileName>./hadronsxml/rarekaon_000_@pmom@_tK@dtK@_tpi@dtP@_tJ@dtJ@_witheye_@ti@_@ts@_@tf@.xml</xmlFileName>
     </ioPar>
+    <gaugeFixPar>
+        <alpha>0.05</alpha>
+        <maxiter>1000000</maxiter>
+        <Omega_tol>1e-08</Omega_tol>
+        <Phi_tol>1e-08</Phi_tol>
+        <Fourier>true</Fourier>
+    </gaugeFixPar>
     <zMobiusPar>
         <Ls>10</Ls>
         <M5>1.8</M5>
@@ -78,28 +86,43 @@
           <elem>(6.863249884465925e-02,-5.506585308274019e-02)</elem>
         </omega>
     </zMobiusPar>
+    <dwfPar>
+        <Ls>24</Ls>
+        <M5>1.8</M5>
+        <scale>2.0</scale>
+    </dwfPar>
+    <madwfPar>
+        <useMADWF>true</useMADWF>
+    </madwfPar>
     <lightActionPar>
         <mass>0.00078</mass>
         <residual>1e-08</residual>
         <loopResidual>1e-04</loopResidual>
+        <innerMADWFResidual>1e-08</innerMADWFResidual>
+        <outerMADWFResidual>1e-08</outerMADWFResidual>
+        <loopInnerMADWFResidual>1e-04</loopInnerMADWFResidual>
+        <loopOuterMADWFResidual>1e-04</loopOuterMADWFResidual>
     </lightActionPar>
     <charm1ActionPar>
         <mass>0.20</mass>
         <residual>1e-04</residual>
+        <innerMADWFResidual>1e-04</innerMADWFResidual>
+        <outerMADWFResidual>1e-04</outerMADWFResidual>
     </charm1ActionPar>
     <charm2ActionPar>
         <mass>0.25</mass>
         <residual>1e-04</residual>
+        <innerMADWFResidual>1e-04</innerMADWFResidual>
+        <outerMADWFResidual>1e-04</outerMADWFResidual>
     </charm2ActionPar>
     <charm3ActionPar>
         <mass>0.30</mass>
         <residual>1e-04</residual>
+        <innerMADWFResidual>1e-04</innerMADWFResidual>
+        <outerMADWFResidual>1e-04</outerMADWFResidual>
     </charm3ActionPar>
     <strangeActionPar>
         <mass>0.0362</mass>
-        <Ls>24</Ls>
-        <M5>1.8</M5>
-        <scale>2.0</scale>
         <residual>1e-08</residual>
     </strangeActionPar>
 </grid>

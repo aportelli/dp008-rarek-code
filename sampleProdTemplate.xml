@@ -8,15 +8,25 @@
         <end>1020</end>
         <step>20</step>
     </trajRange>
+    <geneticPar>
+      <popSize>10</popSize>
+      <maxGen>500</maxGen>
+      <maxCstGen>40</maxCstGen>
+      <mutationRate>0.1</mutationRate>
+    </geneticPar>
     <dbPar>
-        <applicationDb>rareK100App.db</applicationDb>
-        <resultDb>rareKaonResults.db</resultDb>
+        <applicationDb>rareK100AppTest.db</applicationDb>
+        <resultDb>./database/rareKaonResults.db</resultDb>
+        <createProfile>false</createProfile>
+        <createSchedule>false</createSchedule>
         <restoreSchedule>false</restoreSchedule>
         <restoreModules>false</restoreModules>
         <restoreMemoryProfile>false</restoreMemoryProfile>
-        <makeStatDb>true</makeStatDb>
+        <makeStatDb>false</makeStatDb>
+        <populateResultDb>false</populateResultDb>
     </dbPar>
     <timePar>
+        <nt>96</nt>
         <dt>2</dt>
         <dtK>0</dtK>
         <dtJ>2</dtJ>
@@ -38,6 +48,10 @@
         <localGamma>GammaT</localGamma>
         <threePtGammaInsertions>Identity GammaT GammaX GammaY GammaZ</threePtGammaInsertions>
     </gammaPar>
+    <noisePar>
+        <nHits>1</nHits>
+        <hitFloor>0</hitFloor>
+    </noisePar>
     <ioPar>
         <gaugeFile></gaugeFile>
         <epackFile></epackFile>
@@ -45,9 +59,16 @@
         <epackLs>0</epackLs>
         <epackMultiFile>false</epackMultiFile>
         <scheduleFile></scheduleFile>
-        <resultStem>./result/multiSparseTest/1_0_0</resultStem>
+        <resultStem>./result/k000_p100/</resultStem>
         <xmlFileName>./par/sampleProd.xml</xmlFileName>
     </ioPar>
+    <gaugeFixPar>
+        <alpha>0.05</alpha>
+        <maxiter>1000000</maxiter>
+        <Omega_tol>1e-08</Omega_tol>
+        <Phi_tol>1e-08</Phi_tol>
+        <Fourier>true</Fourier>
+    </gaugeFixPar>
     <zMobiusPar>
         <Ls>10</Ls>
         <M5>1.8</M5>
@@ -66,27 +87,43 @@
           <elem>(6.863249884465925e-02,-5.506585308274019e-02)</elem>
         </omega>
     </zMobiusPar>
+    <madwfPar>
+        <useMADWF>false</useMADWF>
+    </madwfPar>
+    <dwfPar>
+        <Ls>10</Ls>
+        <M5>1.8</M5>
+        <scale>2.0</scale>
+    </dwfPar>
     <lightActionPar>
-        <mass>0.00078</mass>
-        <residual>1e-08</residual>
+        <mass>0.078</mass>
+        <residual>1e-02</residual>
+        <loopResidual>1e-02</loopResidual>
+        <innerMADWFResidual>1e-02</innerMADWFResidual>
+        <outerMADWFResidual>1e-02</outerMADWFResidual>
+        <loopInnerMADWFResidual>1e-02</loopInnerMADWFResidual>
+        <loopOuterMADWFResidual>1e-02</loopOuterMADWFResidual>
     </lightActionPar>
     <charm1ActionPar>
         <mass>0.20</mass>
-        <residual>1e-10</residual>
+        <residual>1e-02</residual>
+        <innerMADWFResidual>1e-02</innerMADWFResidual>
+        <outerMADWFResidual>1e-02</outerMADWFResidual>
     </charm1ActionPar>
     <charm2ActionPar>
         <mass>0.25</mass>
-        <residual>1e-12</residual>
+        <residual>1e-02</residual>
+        <innerMADWFResidual>1e-02</innerMADWFResidual>
+        <outerMADWFResidual>1e-02</outerMADWFResidual>
     </charm2ActionPar>
     <charm3ActionPar>
         <mass>0.30</mass>
-        <residual>1e-14</residual>
+        <residual>1e-02</residual>
+        <innerMADWFResidual>1e-02</innerMADWFResidual>
+        <outerMADWFResidual>1e-02</outerMADWFResidual>
     </charm3ActionPar>
     <strangeActionPar>
         <mass>0.0362</mass>
-        <Ls>24</Ls>
-        <M5>1.8</M5>
-        <scale>2.0</scale>
-        <residual>1e-08</residual>
+        <residual>1e-02</residual>
     </strangeActionPar>
 </grid>
