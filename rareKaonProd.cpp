@@ -117,6 +117,15 @@ namespace RareKaonInputs
                                         std::vector<ComplexD>, omega);
     };
 
+    class DWFPar : Serializable
+    {
+    public:
+        GRID_SERIALIZABLE_CLASS_MEMBERS(DWFPar,
+                                        unsigned int, Ls,
+                                        double,       M5,
+                                        double,       scale);
+    };
+
     class LightActionPar : Serializable
     {
     public:
@@ -145,9 +154,6 @@ namespace RareKaonInputs
     public:
         GRID_SERIALIZABLE_CLASS_MEMBERS(StrangeActionPar,
                                         double,       mass,
-                                        unsigned int, Ls,
-                                        double,       M5,
-                                        double,       scale,
                                         double,       residual);
     };
 
@@ -155,10 +161,18 @@ namespace RareKaonInputs
     {
     public:
         GRID_SERIALIZABLE_CLASS_MEMBERS(MADWFPar,
-                                        bool,         useMADWF,
-                                        unsigned int, Ls,
-                                        double,       M5,
-                                        double,       scale);
+                                        bool,         useMADWF);
+    };
+    
+    class GaugeFixPar : Serializable
+    {
+    public:
+        GRID_SERIALIZABLE_CLASS_MEMBERS(GaugeFixPar,
+                                        double, alpha,
+                                        double, maxiter,
+                                        double, Omega_tol,
+                                        double, Phi_tol,
+                                        bool,   Fourier);
     };
     
 } // namespace RareKaonInputs
@@ -170,17 +184,19 @@ struct RareKaonPar
     RareKaonInputs::CharmActionPar   charm2ActionPar;
     RareKaonInputs::CharmActionPar   charm3ActionPar;
     RareKaonInputs::LightActionPar   lightActionPar;
+    RareKaonInputs::GaugeFixPar      gaugeFixPar;
     RareKaonInputs::GeneticPar       geneticPar;
     RareKaonInputs::ZMobiusPar       zMobiusPar;
     RareKaonInputs::TrajRange        trajRange;
     RareKaonInputs::GammaPar         gammaPar;
+    RareKaonInputs::MADWFPar         madwfPar;
     RareKaonInputs::NoisePar         noisePar;
     RareKaonInputs::TimePar          timePar;
-    RareKaonInputs::RunPar           runPar;
+    RareKaonInputs::DWFPar           dwfPar;
     RareKaonInputs::MomPar           momPar;
+    RareKaonInputs::RunPar           runPar;
     RareKaonInputs::DbPar            dbPar;
     RareKaonInputs::IOPar            ioPar;
-    RareKaonInputs::MADWFPar         MADWFPar;
 };
 int main(int argc, char *argv[])
 {
@@ -205,19 +221,21 @@ int main(int argc, char *argv[])
     read(reader,  "charm2ActionPar",  par.charm2ActionPar);
     read(reader,  "charm3ActionPar",  par.charm3ActionPar);
     read(reader,   "lightActionPar",   par.lightActionPar);
+    read(reader,      "gaugeFixPar",      par.gaugeFixPar);
     read(reader,       "geneticPar",       par.geneticPar);
     read(reader,       "zMobiusPar",       par.zMobiusPar);
     read(reader,        "trajRange",        par.trajRange);
     read(reader,         "gammaPar",         par.gammaPar);
+    read(reader,         "madwfPar",         par.madwfPar);
     read(reader,         "noisePar",         par.noisePar);
     read(reader,          "timePar",          par.timePar);
-    read(reader,           "runPar",           par.runPar);
+    read(reader,           "dwfPar",           par.dwfPar);
     read(reader,           "momPar",           par.momPar);
+    read(reader,           "runPar",           par.runPar);
     read(reader,            "dbPar",            par.dbPar);
     read(reader,            "ioPar",            par.ioPar);
-    read(reader,         "madwfPar",         par.MADWFPar);
   
-    bool useMADWF = par.MADWFPar.useMADWF;
+    bool useMADWF = par.madwfPar.useMADWF;
     if(useMADWF)
     {
         LOG(Message) << "using MADWF action" << std::endl;
@@ -305,43 +323,34 @@ int main(int argc, char *argv[])
                                 par.charm1ActionPar.mass,
                                 par.charm2ActionPar.mass,
                                 par.charm3ActionPar.mass};
-    std::vector<double> residual = {par.strangeActionPar.residual,
-                                    par.lightActionPar.residual,
-                                    par.charm1ActionPar.residual,
-                                    par.charm2ActionPar.residual,
-                                    par.charm3ActionPar.residual};
 
-    std::vector<double> loopResidual = {par.strangeActionPar.residual,
-                                        par.lightActionPar.loopResidual,
+    std::vector<double> residual     = {par.strangeActionPar.residual,
+                                        par.lightActionPar.residual};
+    std::vector<double> loopResidual = {par.lightActionPar.loopResidual,
                                         par.charm1ActionPar.residual,
                                         par.charm2ActionPar.residual,
                                         par.charm3ActionPar.residual};
-    std::vector<double> innerMADWFResidual = {par.strangeActionPar.residual,
-                                              par.lightActionPar.innerMADWFResidual,
-                                              par.charm1ActionPar.innerMADWFResidual,
-                                              par.charm2ActionPar.innerMADWFResidual,
-                                              par.charm3ActionPar.innerMADWFResidual};
-    std::vector<double> outerMADWFResidual = {par.strangeActionPar.residual,
-                                              par.lightActionPar.outerMADWFResidual,
-                                              par.charm1ActionPar.outerMADWFResidual,
-                                              par.charm2ActionPar.outerMADWFResidual,
-                                              par.charm3ActionPar.outerMADWFResidual};
-    std::vector<double> loopInnerMADWFResidual = {par.strangeActionPar.residual,
-                                              par.lightActionPar.loopInnerMADWFResidual,
-                                              par.charm1ActionPar.residual,
-                                              par.charm2ActionPar.residual,
-                                              par.charm3ActionPar.residual};
-    std::vector<double> loopOuterMADWFResidual = {par.strangeActionPar.residual,
-                                              par.lightActionPar.loopOuterMADWFResidual,
-                                              par.charm1ActionPar.residual,
-                                              par.charm2ActionPar.residual,
-                                              par.charm3ActionPar.residual};
-    std::vector<unsigned int> Ls = {par.strangeActionPar.Ls,
-                                    par.zMobiusPar.Ls};
-    std::vector<double> M5 = {par.strangeActionPar.M5,
-                              par.zMobiusPar.M5};
+    std::vector<double> loopInnerMADWFResidual = {par.lightActionPar.loopInnerMADWFResidual,
+                                                  par.charm1ActionPar.innerMADWFResidual,
+                                                  par.charm2ActionPar.innerMADWFResidual,
+                                                  par.charm3ActionPar.innerMADWFResidual};
+    std::vector<double> loopOuterMADWFResidual = {par.lightActionPar.loopOuterMADWFResidual,
+                                                  par.charm1ActionPar.outerMADWFResidual,
+                                                  par.charm2ActionPar.outerMADWFResidual,
+                                                  par.charm3ActionPar.outerMADWFResidual};
+    double lightOuterMADWFResidual = par.lightActionPar.outerMADWFResidual;
+    double lightInnerMADWFResidual = par.lightActionPar.innerMADWFResidual;
+
+    unsigned int dwfLs    = par.dwfPar.Ls;
+    unsigned int dwfM5    = par.dwfPar.M5;
+    unsigned int dwfScale = par.dwfPar.scale;
+    unsigned int zmobLs = par.zMobiusPar.Ls;
+    unsigned int zmobM5 = par.zMobiusPar.M5;
     std::string boundary = "1 1 1 -1";
     std::string twist = "0. 0. 0. 0.";
+    unsigned int maxInnerIteration = 30000;
+    unsigned int maxOuterIteration = 100;
+    unsigned int maxPVIteration    = 30000;
     unsigned int nt = GridDefaultLatt()[Tp];
     if (populateResultDb) nt = par.timePar.nt;
 
@@ -365,12 +374,12 @@ int main(int argc, char *argv[])
     // gauge fixing
     MGauge::GaugeFix::Par gaugeFixPar;
     gaugeFixPar.gauge = "gauge";
-    gaugeFixPar.alpha = 0.05;
-    gaugeFixPar.maxiter = 1000000;
-    gaugeFixPar.Omega_tol = 1e-8;
-    gaugeFixPar.Phi_tol = 1e-8;
+    gaugeFixPar.alpha = par.gaugeFixPar.alpha;
+    gaugeFixPar.maxiter = par.gaugeFixPar.maxiter;
+    gaugeFixPar.Omega_tol = par.gaugeFixPar.Omega_tol;
+    gaugeFixPar.Phi_tol = par.gaugeFixPar.Phi_tol;
     gaugeFixPar.gaugeFix = Grid::Hadrons::MGauge::Fix::coulomb;
-    gaugeFixPar.Fourier = true;
+    gaugeFixPar.Fourier = par.gaugeFixPar.Fourier;
     application.createModule<MGauge::GaugeFix>("gaugeFix", gaugeFixPar);
 
     // gauge field cast
@@ -379,35 +388,20 @@ int main(int argc, char *argv[])
     application.createModule<MUtilities::GaugeSinglePrecisionCast>("gaugefFix", gaugefFixPar);
     
     // epack
-
     if (!(par.ioPar.epackFile.empty()))
     {
-        // MADWF mixed precision uses a single-precision eigenPack
-        if(useMADWF)
-        {
-            // gauge field cast
-            MUtilities::ColourMatrixSinglePrecisionCast::Par gaugefXformPar;
-            gaugefXformPar.field = "gaugeFix_xform";
-            application.createModule<MUtilities::ColourMatrixSinglePrecisionCast>("gaugefFix_xform", gaugefXformPar);
+        // gauge field cast
+        MUtilities::ColourMatrixSinglePrecisionCast::Par gaugefXformPar;
+        gaugefXformPar.field = "gaugeFix_xform";
+        application.createModule<MUtilities::ColourMatrixSinglePrecisionCast>("gaugefFix_xform", gaugefXformPar);
 
-            MIO::LoadFermionEigenPackF::Par epackPar;
-            epackPar.filestem = par.ioPar.epackFile;
-            epackPar.multiFile = par.ioPar.epackMultiFile;
-            epackPar.size = par.ioPar.epackSize;
-            epackPar.Ls = par.ioPar.epackLs;
-            epackPar.gaugeXform = "gaugefFix_xform";
-            application.createModule<MIO::LoadFermionEigenPackF>("epack_l", epackPar);
-	}
-	else
-	{
-            MIO::LoadFermionEigenPackIo32::Par epackPar;
-            epackPar.filestem = par.ioPar.epackFile;
-            epackPar.multiFile = par.ioPar.epackMultiFile;
-            epackPar.size = par.ioPar.epackSize;
-            epackPar.Ls = par.ioPar.epackLs;
-            epackPar.gaugeXform = "gaugeFix_xform";
-            application.createModule<MIO::LoadFermionEigenPackIo32>("epack_l", epackPar);
-	}
+        MIO::LoadFermionEigenPackF::Par epackPar;
+        epackPar.filestem = par.ioPar.epackFile;
+        epackPar.multiFile = par.ioPar.epackMultiFile;
+        epackPar.size = par.ioPar.epackSize;
+        epackPar.Ls = par.ioPar.epackLs;
+        epackPar.gaugeXform = "gaugefFix_xform";
+        application.createModule<MIO::LoadFermionEigenPackF>("epack_l", epackPar);
     }
     else
     {
@@ -417,22 +411,22 @@ int main(int argc, char *argv[])
     // DWF action: strange
     MAction::ScaledDWF::Par actionStrangePar;
     actionStrangePar.gauge = "gaugeFix";
-    actionStrangePar.Ls = Ls[0];
-    actionStrangePar.M5 = M5[0];
+    actionStrangePar.Ls = dwfLs;
+    actionStrangePar.M5 = dwfM5;
     actionStrangePar.mass = mass[0];
     actionStrangePar.boundary = boundary;
-    actionStrangePar.scale = par.strangeActionPar.scale;
+    actionStrangePar.scale = dwfScale;
     actionStrangePar.twist = twist;
     application.createModule<MAction::ScaledDWF>("dwf_" + flavour[0], actionStrangePar);
 
     // actionF strange
     MAction::ScaledDWFF::Par actionFStrangePar;
     actionFStrangePar.gauge = "gaugefFix";
-    actionFStrangePar.Ls = Ls[0];
-    actionFStrangePar.M5 = M5[0];
+    actionFStrangePar.Ls = dwfLs;
+    actionFStrangePar.M5 = dwfM5;
     actionFStrangePar.mass = mass[0];
     actionFStrangePar.boundary = boundary;
-    actionFStrangePar.scale = par.strangeActionPar.scale;
+    actionFStrangePar.scale = dwfScale;
     actionFStrangePar.twist = twist;
     application.createModule<MAction::ScaledDWFF>("dwff_" + flavour[0], actionFStrangePar);
 
@@ -441,8 +435,8 @@ int main(int argc, char *argv[])
     solverParStrange.innerAction = "dwff_" + flavour[0];
     solverParStrange.outerAction = "dwf_" + flavour[0];
     solverParStrange.residual = residual[0];
-    solverParStrange.maxInnerIteration = 30000;
-    solverParStrange.maxOuterIteration = 100;
+    solverParStrange.maxInnerIteration = maxInnerIteration;
+    solverParStrange.maxOuterIteration = maxOuterIteration;
     solverParStrange.eigenPack = epack[0];
     application.createModule<MSolver::MixedPrecisionRBPrecCG>("mcg_" + flavour[0], solverParStrange);
 
@@ -452,8 +446,8 @@ int main(int argc, char *argv[])
         // actionF light
         MAction::ZMobiusDWFF::Par ZMobFAction;
         ZMobFAction.gauge = "gaugefFix";
-        ZMobFAction.Ls = Ls[1];
-        ZMobFAction.M5 = M5[1];
+        ZMobFAction.Ls = zmobLs;
+        ZMobFAction.M5 = zmobM5;
         ZMobFAction.mass = mass[i];
         ZMobFAction.boundary = boundary;
         ZMobFAction.b = par.zMobiusPar.b;
@@ -470,11 +464,11 @@ int main(int argc, char *argv[])
             //outer action: Mobius double precision
             MAction::ScaledDWF::Par MobActionPar;
             MobActionPar.gauge = "gaugeFix";
-            MobActionPar.Ls = par.MADWFPar.Ls;
-            MobActionPar.M5 = par.MADWFPar.M5;
+            MobActionPar.Ls = dwfLs;
+            MobActionPar.M5 = dwfM5;
             MobActionPar.mass = mass[i];
             MobActionPar.boundary = boundary;
-            MobActionPar.scale = par.MADWFPar.scale; 
+            MobActionPar.scale = dwfScale; 
             MobActionPar.twist = twist;
             application.createModule<MAction::ScaledDWF>("dwf_" + flavour[i], MobActionPar);
     
@@ -482,11 +476,11 @@ int main(int argc, char *argv[])
             MSolver::ZMADWFMixedPrecCG::Par MADWFPar;
             MADWFPar.innerAction = "dwff_" + flavour[i];
             MADWFPar.outerAction = "dwf_" + flavour[i];
-            MADWFPar.maxInnerIteration = 30000;
-            MADWFPar.maxOuterIteration = 100;
-            MADWFPar.maxPVIteration = 30000;
-            MADWFPar.innerResidual = innerMADWFResidual[i]; //innerLoopRes!!!
-            MADWFPar.outerResidual = outerMADWFResidual[i];
+            MADWFPar.maxInnerIteration = maxInnerIteration;
+            MADWFPar.maxOuterIteration = maxOuterIteration;
+            MADWFPar.maxPVIteration = maxPVIteration;
+            MADWFPar.innerResidual = loopInnerMADWFResidual[i-1]; //innerLoopRes!!!
+            MADWFPar.outerResidual = loopOuterMADWFResidual[i-1];
             MADWFPar.eigenPack = epack[i];
             application.createModule<MSolver::ZMADWFMixedPrecCG>("loopMcg_" + flavour[i], MADWFPar);     
         }
@@ -494,11 +488,11 @@ int main(int argc, char *argv[])
         MSolver::ZMADWFMixedPrecCG::Par MADWFActionPar;
         MADWFActionPar.innerAction = "dwff_" + flavour[1];
         MADWFActionPar.outerAction = "dwf_" + flavour[1];
-        MADWFActionPar.maxInnerIteration = 30000;
-        MADWFActionPar.maxOuterIteration = 100;
-        MADWFActionPar.maxPVIteration = 30000;
-        MADWFActionPar.innerResidual = loopInnerMADWFResidual[1];
-        MADWFActionPar.outerResidual = loopOuterMADWFResidual[1];
+        MADWFActionPar.maxInnerIteration = maxInnerIteration;
+        MADWFActionPar.maxOuterIteration = maxOuterIteration;
+        MADWFActionPar.maxPVIteration = maxPVIteration;
+        MADWFActionPar.innerResidual = lightInnerMADWFResidual;
+        MADWFActionPar.outerResidual = lightOuterMADWFResidual;
         MADWFActionPar.eigenPack = epack[1];
         application.createModule<MSolver::ZMADWFMixedPrecCG>("mcg_" + flavour[1], MADWFActionPar); 
     }
@@ -509,8 +503,8 @@ int main(int argc, char *argv[])
         {
             MAction::ZMobiusDWF::Par ZMobActionPar;
             ZMobActionPar.gauge = "gaugeFix";
-            ZMobActionPar.Ls = Ls[1];
-            ZMobActionPar.M5 = M5[1];
+            ZMobActionPar.Ls = zmobLs;
+            ZMobActionPar.M5 = zmobM5;
             ZMobActionPar.mass = mass[i];
             ZMobActionPar.boundary = boundary;
             ZMobActionPar.b = par.zMobiusPar.b;
@@ -523,9 +517,9 @@ int main(int argc, char *argv[])
             MSolver::ZMixedPrecisionRBPrecCG::Par ZMobSolverPar;
             ZMobSolverPar.innerAction = "dwff_" + flavour[i];
             ZMobSolverPar.outerAction = "dwf_" + flavour[i];
-            ZMobSolverPar.residual = loopResidual[i];
-            ZMobSolverPar.maxInnerIteration = 30000;
-            ZMobSolverPar.maxOuterIteration = 100;
+            ZMobSolverPar.residual = loopResidual[i-1];
+            ZMobSolverPar.maxInnerIteration = maxInnerIteration;
+            ZMobSolverPar.maxOuterIteration = maxOuterIteration;
             ZMobSolverPar.eigenPack = epack[i];
             application.createModule<MSolver::ZMixedPrecisionRBPrecCG>("loopMcg_" + flavour[i], ZMobSolverPar);
     
@@ -535,8 +529,8 @@ int main(int argc, char *argv[])
         ZMobSolverPar.innerAction = "dwff_" + flavour[1];
         ZMobSolverPar.outerAction = "dwf_" + flavour[1];
         ZMobSolverPar.residual = residual[1];
-        ZMobSolverPar.maxInnerIteration = 30000;
-        ZMobSolverPar.maxOuterIteration = 100;
+        ZMobSolverPar.maxInnerIteration = maxInnerIteration;
+        ZMobSolverPar.maxOuterIteration = maxOuterIteration;
         ZMobSolverPar.eigenPack = epack[1];
         application.createModule<MSolver::ZMixedPrecisionRBPrecCG>("mcg_" + flavour[1], ZMobSolverPar);
     }
@@ -564,7 +558,7 @@ int main(int argc, char *argv[])
             sparseNoise = "sparseNoise_" + std::to_string(h);
             sparseNoises = "sparseNoises_" + std::to_string(h);
         }
-        
+
         makeZ2SparseSources(application, nsrc, nsparse, sparseNoises);
         unpackProps(application, sparseNoises, nds, sparseNoise, unpackedNoises[hInd]);
 
@@ -609,7 +603,6 @@ int main(int argc, char *argv[])
             makeDiscLoop(application, loop, discMom[m], resDiscLoop, discLoop,
                          dlVcEntry, "Disconnected");
         }
-
     }
 
     // sinks
@@ -647,7 +640,7 @@ int main(int argc, char *argv[])
         tk = (t + dtK) % nt;
         tj = (t + dtJ) % nt;
         tp = (t + dtP) % nt;
-        stk = std::to_string(t);
+        stk = std::to_string(tk);
         stj = std::to_string(tj);
         stp = std::to_string(tp);
         timeStamp = stk + "_tJ_" + stj + "_tP_" + stp;
@@ -976,7 +969,7 @@ int main(int argc, char *argv[])
                 makeWeakEye(application, qWallksPmom, qWallplbarPmom, smearedqWallklZeromom, loop3pt,
                             gammaIn, gammaOut, tp, resWHE3ptPmom, WHE3ptPmom,
                             weP3ptEntry, "Three_point_Hw");
-            
+
                 // 4pt Contractions
                 // l
                 std::string resWHE4ptVcspec = resultStem + "/4pt/RK/4pt_Eye_" + sparseName
@@ -1071,6 +1064,7 @@ int main(int argc, char *argv[])
             }
         }
     }
+
     if(populateResultDb)
     {
         LOG(Message) << "Populating result dabatase..." << std::endl;
