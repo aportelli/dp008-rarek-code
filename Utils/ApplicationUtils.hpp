@@ -59,7 +59,8 @@ void makeGaugeProps(Application &application, const std::string solver,
     {
       propName = name + "_" + std::to_string(i);
       srcName  = sources[i];
-      if(zProp){	      
+      if(zProp)
+      {	      
         makeZGaugeProp(application, solver, srcName, propName);
       }
       else
@@ -162,7 +163,7 @@ void makeSeqProp(Application &application, const std::string solver,
                  const std::string action, const unsigned int tJ,
                  const std::string mom, const std::string propName,
                  const std::string source, const std::string seqPropName,
-		 bool zProp)
+                 bool zProp)
 {
     std::string srcName = makeSeqSourceName(tJ, mom, seqPropName);
     if(zProp)
