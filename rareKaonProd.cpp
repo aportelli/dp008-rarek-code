@@ -485,8 +485,8 @@ int main(int argc, char *argv[])
             MADWFPar.maxInnerIteration = 30000;
             MADWFPar.maxOuterIteration = 100;
             MADWFPar.maxPVIteration = 30000;
-            MADWFPar.innerResidual = innerMADWFResidual[i]; //innerLoopRes!!!
-            MADWFPar.outerResidual = outerMADWFResidual[i];
+            MADWFPar.innerResidual = loopInnerMADWFResidual[i]; //innerLoopRes!!!
+            MADWFPar.outerResidual = loopOuterMADWFResidual[i];
             MADWFPar.eigenPack = epack[i];
             application.createModule<MSolver::ZMADWFMixedPrecCG>("loopMcg_" + flavour[i], MADWFPar);     
         }
@@ -497,8 +497,8 @@ int main(int argc, char *argv[])
         MADWFActionPar.maxInnerIteration = 30000;
         MADWFActionPar.maxOuterIteration = 100;
         MADWFActionPar.maxPVIteration = 30000;
-        MADWFActionPar.innerResidual = loopInnerMADWFResidual[1];
-        MADWFActionPar.outerResidual = loopOuterMADWFResidual[1];
+        MADWFActionPar.innerResidual = innerMADWFResidual[1];
+        MADWFActionPar.outerResidual = outerMADWFResidual[1];
         MADWFActionPar.eigenPack = epack[1];
         application.createModule<MSolver::ZMADWFMixedPrecCG>("mcg_" + flavour[1], MADWFActionPar); 
     }
