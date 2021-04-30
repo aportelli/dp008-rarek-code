@@ -489,7 +489,7 @@ int main(int argc, char *argv[])
         {
             //inner action: Mobius single precision
             MAction::ScaledDWFF::Par MobFActionPar;
-            MobFActionPar.gauge = "gaugeFix";
+            MobFActionPar.gauge = "gaugefFix";
             MobFActionPar.Ls = par.MADWFPar.Ls;
             MobFActionPar.M5 = par.MADWFPar.M5;
             MobFActionPar.mass = mass[i];
