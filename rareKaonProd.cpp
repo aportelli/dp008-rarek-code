@@ -446,28 +446,59 @@ int main(int argc, char *argv[])
     solverParStrange.eigenPack = epack[0];
     application.createModule<MSolver::MixedPrecisionRBPrecCG>("mcg_" + flavour[0], solverParStrange);
 
-    // inner action used both for Mixed Precision and MADWF
-    for (unsigned int i = 1; i < flavour.size(); ++i)
+    // MADWF
+    if(useMADWF)
     {
         // actionF light
         MAction::ZMobiusDWFF::Par ZMobFAction;
         ZMobFAction.gauge = "gaugefFix";
         ZMobFAction.Ls = Ls[1];
         ZMobFAction.M5 = M5[1];
-        ZMobFAction.mass = mass[i];
+        ZMobFAction.mass = mass[1];
         ZMobFAction.boundary = boundary;
         ZMobFAction.b = par.zMobiusPar.b;
         ZMobFAction.c = par.zMobiusPar.c;
         ZMobFAction.omega = par.zMobiusPar.omega;
         ZMobFAction.twist = twist;
-        application.createModule<MAction::ZMobiusDWFF>("dwff_" + flavour[i], ZMobFAction);
-    }
-    // MADWF
-    if(useMADWF)
-    {
-        for (unsigned int i = 1; i < flavour.size(); ++i)
+        application.createModule<MAction::ZMobiusDWFF>("dwff_" + flavour[1], ZMobFAction);
+
+	//outer action: Mobius double precision
+        MAction::ScaledDWF::Par MobActionPar;
+        MobActionPar.gauge = "gaugeFix";
+        MobActionPar.Ls = par.MADWFPar.Ls;
+        MobActionPar.M5 = par.MADWFPar.M5;
+        MobActionPar.mass = mass[1];
+        MobActionPar.boundary = boundary;
+        MobActionPar.scale = par.MADWFPar.scale; 
+        MobActionPar.twist = twist;
+        application.createModule<MAction::ScaledDWF>("dwf_" + flavour[1], MobActionPar);
+    
+        //MADWF solver light
+        MSolver::ZMADWFMixedPrecCG::Par MADWFPar;
+        MADWFPar.innerAction = "dwff_" + flavour[1];
+        MADWFPar.outerAction = "dwf_" + flavour[1];
+        MADWFPar.maxInnerIteration = 30000;
+        MADWFPar.maxOuterIteration = 100;
+        MADWFPar.maxPVIteration = 30000;
+        MADWFPar.innerResidual = loopInnerMADWFResidual[1]; //innerLoopRes!!!
+        MADWFPar.outerResidual = loopOuterMADWFResidual[1];
+        MADWFPar.eigenPack = epack[1];
+        application.createModule<MSolver::ZMADWFMixedPrecCG>("loopMcg_" + flavour[1], MADWFPar);     
+
+	for (unsigned int i = 2; i < flavour.size(); ++i)
         {
-            //outer action: Mobius double precision
+            //inner action: Mobius single precision
+            MAction::ScaledDWFF::Par MobFActionPar;
+            MobFActionPar.gauge = "gaugefFix";
+            MobFActionPar.Ls = par.MADWFPar.Ls;
+            MobFActionPar.M5 = par.MADWFPar.M5;
+            MobFActionPar.mass = mass[i];
+            MobFActionPar.boundary = boundary;
+            MobFActionPar.scale = par.MADWFPar.scale; 
+            MobFActionPar.twist = twist;
+            application.createModule<MAction::ScaledDWFF>("dwff_" + flavour[i], MobFActionPar);
+
+	    //outer action: Mobius double precision
             MAction::ScaledDWF::Par MobActionPar;
             MobActionPar.gauge = "gaugeFix";
             MobActionPar.Ls = par.MADWFPar.Ls;
@@ -478,17 +509,15 @@ int main(int argc, char *argv[])
             MobActionPar.twist = twist;
             application.createModule<MAction::ScaledDWF>("dwf_" + flavour[i], MobActionPar);
     
-            //MADWF solver light
-            MSolver::ZMADWFMixedPrecCG::Par MADWFPar;
-            MADWFPar.innerAction = "dwff_" + flavour[i];
-            MADWFPar.outerAction = "dwf_" + flavour[i];
-            MADWFPar.maxInnerIteration = 30000;
-            MADWFPar.maxOuterIteration = 100;
-            MADWFPar.maxPVIteration = 30000;
-            MADWFPar.innerResidual = loopInnerMADWFResidual[i]; //innerLoopRes!!!
-            MADWFPar.outerResidual = loopOuterMADWFResidual[i];
-            MADWFPar.eigenPack = epack[i];
-            application.createModule<MSolver::ZMADWFMixedPrecCG>("loopMcg_" + flavour[i], MADWFPar);     
+            //Mobius mixed precision solver charm
+            MSolver::MixedPrecisionRBPrecCG::Par MobSolverPar;
+            MobSolverPar.innerAction = "dwff_" + flavour[i];
+            MobSolverPar.outerAction = "dwf_" + flavour[i];
+            MobSolverPar.residual = loopResidual[i];
+            MobSolverPar.maxInnerIteration = 30000;
+            MobSolverPar.maxOuterIteration = 100;
+            MobSolverPar.eigenPack = epack[i];
+            application.createModule<MSolver::MixedPrecisionRBPrecCG>("loopMcg_" + flavour[i], MobSolverPar);
         }
         // Solver (non-loop): light
         MSolver::ZMADWFMixedPrecCG::Par MADWFActionPar;
@@ -507,7 +536,20 @@ int main(int argc, char *argv[])
     {
         for (unsigned int i = 1; i < flavour.size(); ++i)
         {
-            MAction::ZMobiusDWF::Par ZMobActionPar;
+            // actionF light
+            MAction::ZMobiusDWFF::Par ZMobFAction;
+            ZMobFAction.gauge = "gaugefFix";
+            ZMobFAction.Ls = Ls[1];
+            ZMobFAction.M5 = M5[1];
+            ZMobFAction.mass = mass[i];
+            ZMobFAction.boundary = boundary;
+            ZMobFAction.b = par.zMobiusPar.b;
+            ZMobFAction.c = par.zMobiusPar.c;
+            ZMobFAction.omega = par.zMobiusPar.omega;
+            ZMobFAction.twist = twist;
+            application.createModule<MAction::ZMobiusDWFF>("dwff_" + flavour[i], ZMobFAction);
+
+	    MAction::ZMobiusDWF::Par ZMobActionPar;
             ZMobActionPar.gauge = "gaugeFix";
             ZMobActionPar.Ls = Ls[1];
             ZMobActionPar.M5 = M5[1];
