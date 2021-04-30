@@ -465,31 +465,29 @@ int main(int argc, char *argv[])
     // MADWF
     if(useMADWF)
     {
-        for (unsigned int i = 1; i < flavour.size(); ++i)
-        {
-            //outer action: Mobius double precision
-            MAction::ScaledDWF::Par MobActionPar;
-            MobActionPar.gauge = "gaugeFix";
-            MobActionPar.Ls = par.MADWFPar.Ls;
-            MobActionPar.M5 = par.MADWFPar.M5;
-            MobActionPar.mass = mass[i];
-            MobActionPar.boundary = boundary;
-            MobActionPar.scale = par.MADWFPar.scale; 
-            MobActionPar.twist = twist;
-            application.createModule<MAction::ScaledDWF>("dwf_" + flavour[i], MobActionPar);
-    
-            //MADWF solver light
-            MSolver::ZMADWFMixedPrecCG::Par MADWFPar;
-            MADWFPar.innerAction = "dwff_" + flavour[i];
-            MADWFPar.outerAction = "dwf_" + flavour[i];
-            MADWFPar.maxInnerIteration = 30000;
-            MADWFPar.maxOuterIteration = 100;
-            MADWFPar.maxPVIteration = 30000;
-            MADWFPar.innerResidual = loopInnerMADWFResidual[i]; //innerLoopRes!!!
-            MADWFPar.outerResidual = loopOuterMADWFResidual[i];
-            MADWFPar.eigenPack = epack[i];
-            application.createModule<MSolver::ZMADWFMixedPrecCG>("loopMcg_" + flavour[i], MADWFPar);     
-        }
+        //light action only uses MADWF
+
+        //outer action: Mobius double precision
+        MAction::ScaledDWF::Par MobActionPar;
+        MobActionPar.gauge = "gaugeFix";
+        MobActionPar.Ls = par.MADWFPar.Ls;
+        MobActionPar.M5 = par.MADWFPar.M5;
+        MobActionPar.mass = mass[1];
+        MobActionPar.boundary = boundary;
+        MobActionPar.scale = par.MADWFPar.scale; 
+        MobActionPar.twist = twist;
+        application.createModule<MAction::ScaledDWF>("dwf_" + flavour[1], MobActionPar);
+        //MADWF solver light
+        MSolver::ZMADWFMixedPrecCG::Par MADWFPar;
+        MADWFPar.innerAction = "dwff_" + flavour[1];
+        MADWFPar.outerAction = "dwf_" + flavour[1];
+        MADWFPar.maxInnerIteration = 30000;
+        MADWFPar.maxOuterIteration = 100;
+        MADWFPar.maxPVIteration = 30000;
+        MADWFPar.innerResidual = loopInnerMADWFResidual[1]; //innerLoopRes!!!
+        MADWFPar.outerResidual = loopOuterMADWFResidual[1];
+        MADWFPar.eigenPack = epack[i];
+        application.createModule<MSolver::ZMADWFMixedPrecCG>("loopMcg_" + flavour[1], MADWFPar);     
         // Solver (non-loop): light
         MSolver::ZMADWFMixedPrecCG::Par MADWFActionPar;
         MADWFActionPar.innerAction = "dwff_" + flavour[1];
@@ -502,34 +500,8 @@ int main(int argc, char *argv[])
         MADWFActionPar.eigenPack = epack[1];
         application.createModule<MSolver::ZMADWFMixedPrecCG>("mcg_" + flavour[1], MADWFActionPar); 
     }
-    // Mixed Precision
     else
     {
-        for (unsigned int i = 1; i < flavour.size(); ++i)
-        {
-            MAction::ZMobiusDWF::Par ZMobActionPar;
-            ZMobActionPar.gauge = "gaugeFix";
-            ZMobActionPar.Ls = Ls[1];
-            ZMobActionPar.M5 = M5[1];
-            ZMobActionPar.mass = mass[i];
-            ZMobActionPar.boundary = boundary;
-            ZMobActionPar.b = par.zMobiusPar.b;
-            ZMobActionPar.c = par.zMobiusPar.c;
-            ZMobActionPar.omega = par.zMobiusPar.omega;
-            ZMobActionPar.twist = twist;
-            application.createModule<MAction::ZMobiusDWF>("dwf_" + flavour[i], ZMobActionPar);
-    
-            // solver light
-            MSolver::ZMixedPrecisionRBPrecCG::Par ZMobSolverPar;
-            ZMobSolverPar.innerAction = "dwff_" + flavour[i];
-            ZMobSolverPar.outerAction = "dwf_" + flavour[i];
-            ZMobSolverPar.residual = loopResidual[i];
-            ZMobSolverPar.maxInnerIteration = 30000;
-            ZMobSolverPar.maxOuterIteration = 100;
-            ZMobSolverPar.eigenPack = epack[i];
-            application.createModule<MSolver::ZMixedPrecisionRBPrecCG>("loopMcg_" + flavour[i], ZMobSolverPar);
-    
-        }
         // Solver (non-loop): light
         MSolver::ZMixedPrecisionRBPrecCG::Par ZMobSolverPar;
         ZMobSolverPar.innerAction = "dwff_" + flavour[1];
@@ -539,6 +511,36 @@ int main(int argc, char *argv[])
         ZMobSolverPar.maxOuterIteration = 100;
         ZMobSolverPar.eigenPack = epack[1];
         application.createModule<MSolver::ZMixedPrecisionRBPrecCG>("mcg_" + flavour[1], ZMobSolverPar);
+    }
+    // Mixed Precision l and c - skip l for MADWF
+    for (unsigned int i = 1; i < flavour.size(); ++i)
+    {
+	if(use_MADWF && i==1)
+	{
+	    continue;
+	}
+        MAction::ZMobiusDWF::Par ZMobActionPar;
+        ZMobActionPar.gauge = "gaugeFix";
+        ZMobActionPar.Ls = Ls[1];
+        ZMobActionPar.M5 = M5[1];
+        ZMobActionPar.mass = mass[i];
+        ZMobActionPar.boundary = boundary;
+        ZMobActionPar.b = par.zMobiusPar.b;
+        ZMobActionPar.c = par.zMobiusPar.c;
+        ZMobActionPar.omega = par.zMobiusPar.omega;
+        ZMobActionPar.twist = twist;
+        application.createModule<MAction::ZMobiusDWF>("dwf_" + flavour[i], ZMobActionPar);
+    
+        // solver light
+        MSolver::ZMixedPrecisionRBPrecCG::Par ZMobSolverPar;
+        ZMobSolverPar.innerAction = "dwff_" + flavour[i];
+        ZMobSolverPar.outerAction = "dwf_" + flavour[i];
+        ZMobSolverPar.residual = loopResidual[i];
+        ZMobSolverPar.maxInnerIteration = 30000;
+        ZMobSolverPar.maxOuterIteration = 100;
+        ZMobSolverPar.eigenPack = epack[i];
+        application.createModule<MSolver::ZMixedPrecisionRBPrecCG>("loopMcg_" + flavour[i], ZMobSolverPar);
+    
     }
 
     // Sparse Noise Sources
@@ -578,7 +580,8 @@ int main(int argc, char *argv[])
             std::string solver = "loopMcg_" + flavour[i];
             std::string sparsePropName = "sparseProps_" + std::to_string(h) + "_" + flavour[i];
 
-            makeGaugeProps(application, solver, unpackedNoises[hInd], sparsePropName, sparseProps[hInd][i],!useMADWF);
+            bool zProp = !(useMADWF && i==1);
+            makeGaugeProps(application, solver, unpackedNoises[hInd], sparsePropName, sparseProps[hInd][i],zProp);
             makeLoops(application, sparseProps[hInd][i], unpackedNoises[hInd], sparseLoops[hInd][i]);
         }
     }
@@ -1022,7 +1025,8 @@ int main(int argc, char *argv[])
                 std::string seqSparsePropName = "seqSparseProp_" + std::to_string(h)
                                              + "_" + flavour[i] + "_" + timeStamp;
 
-                makeSeqProps(application, solver, action, tj, qmom, sparseProps[hInd][i], unpackedNoises[hInd], seqSparsePropName, seqSparseProps[hInd][i], !useMADWF);
+                bool zProp = !(useMADWF && i==1);
+                makeSeqProps(application, solver, action, tj, qmom, sparseProps[hInd][i], unpackedNoises[hInd], seqSparsePropName, seqSparseProps[hInd][i], zProp);
                 makeLoops(application, seqSparseProps[hInd][i], unpackedNoises[hInd], seqSparseLoops[hInd][i]);
             }
         }
