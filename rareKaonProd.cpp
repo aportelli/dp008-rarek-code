@@ -482,7 +482,7 @@ int main(int argc, char *argv[])
         MADWFPar.maxPVIteration = 30000;
         MADWFPar.innerResidual = loopInnerMADWFResidual[1]; //innerLoopRes!!!
         MADWFPar.outerResidual = loopOuterMADWFResidual[1];
-        MADWFPar.eigenPack = epack[i];
+        MADWFPar.eigenPack = epack[1];
         application.createModule<MSolver::ZMADWFMixedPrecCG>("loopMcg_" + flavour[1], MADWFPar);     
 
 	for (unsigned int i = 2; i < flavour.size(); ++i)
