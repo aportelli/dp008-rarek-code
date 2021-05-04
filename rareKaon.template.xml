@@ -51,6 +51,7 @@
     <noisePar>
         <nHits>@nHits@</nHits>
         <hitFloor>@hitFloor@</hitFloor>
+        <exactHit>@exactHit@</exactHit>
     </noisePar>
     <ioPar>
         <gaugeFile>config/ckpoint_lat</gaugeFile>
@@ -100,26 +101,20 @@
         <loopResidual>1e-04</loopResidual>
         <innerMADWFResidual>1e-08</innerMADWFResidual>
         <outerMADWFResidual>1e-08</outerMADWFResidual>
-        <loopInnerMADWFResidual>1e-04</loopInnerMADWFResidual>
-        <loopOuterMADWFResidual>1e-04</loopOuterMADWFResidual>
+        <loopInnerMADWFResidual>1e-08</loopInnerMADWFResidual>
+        <loopOuterMADWFResidual>1e-08</loopOuterMADWFResidual>
     </lightActionPar>
     <charm1ActionPar>
         <mass>0.20</mass>
         <residual>1e-04</residual>
-        <innerMADWFResidual>1e-04</innerMADWFResidual>
-        <outerMADWFResidual>1e-04</outerMADWFResidual>
     </charm1ActionPar>
     <charm2ActionPar>
         <mass>0.25</mass>
         <residual>1e-04</residual>
-        <innerMADWFResidual>1e-04</innerMADWFResidual>
-        <outerMADWFResidual>1e-04</outerMADWFResidual>
     </charm2ActionPar>
     <charm3ActionPar>
         <mass>0.30</mass>
         <residual>1e-04</residual>
-        <innerMADWFResidual>1e-04</innerMADWFResidual>
-        <outerMADWFResidual>1e-04</outerMADWFResidual>
     </charm3ActionPar>
     <strangeActionPar>
         <mass>0.0362</mass>

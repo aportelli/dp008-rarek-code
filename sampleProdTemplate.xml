@@ -49,8 +49,9 @@
         <threePtGammaInsertions>Identity GammaT GammaX GammaY GammaZ</threePtGammaInsertions>
     </gammaPar>
     <noisePar>
-        <nHits>1</nHits>
+        <nHits>2</nHits>
         <hitFloor>0</hitFloor>
+        <exactHit>false</exactHit>
     </noisePar>
     <ioPar>
         <gaugeFile></gaugeFile>
@@ -88,7 +89,7 @@
         </omega>
     </zMobiusPar>
     <madwfPar>
-        <useMADWF>false</useMADWF>
+        <useMADWF>true</useMADWF>
     </madwfPar>
     <dwfPar>
         <Ls>10</Ls>
@@ -107,20 +108,14 @@
     <charm1ActionPar>
         <mass>0.20</mass>
         <residual>1e-02</residual>
-        <innerMADWFResidual>1e-02</innerMADWFResidual>
-        <outerMADWFResidual>1e-02</outerMADWFResidual>
     </charm1ActionPar>
     <charm2ActionPar>
         <mass>0.25</mass>
         <residual>1e-02</residual>
-        <innerMADWFResidual>1e-02</innerMADWFResidual>
-        <outerMADWFResidual>1e-02</outerMADWFResidual>
     </charm2ActionPar>
     <charm3ActionPar>
         <mass>0.30</mass>
         <residual>1e-02</residual>
-        <innerMADWFResidual>1e-02</innerMADWFResidual>
-        <outerMADWFResidual>1e-02</outerMADWFResidual>
     </charm3ActionPar>
     <strangeActionPar>
         <mass>0.0362</mass>

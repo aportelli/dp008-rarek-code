@@ -90,7 +90,8 @@ namespace RareKaonInputs
     public:
         GRID_SERIALIZABLE_CLASS_MEMBERS(NoisePar,
                                         unsigned int, nHits,
-                                        unsigned int, hitFloor);
+                                        unsigned int, hitFloor,
+                                        bool,         exactHit);
     };
 
     class IOPar : Serializable
@@ -144,9 +145,7 @@ namespace RareKaonInputs
     public:
         GRID_SERIALIZABLE_CLASS_MEMBERS(CharmActionPar,
                                         double, mass,
-                                        double, residual,
-                                        double, innerMADWFResidual,
-                                        double, outerMADWFResidual);
+                                        double, residual);
     };
 
     class StrangeActionPar : Serializable
@@ -253,7 +252,7 @@ int main(int argc, char *argv[])
     unsigned int nHits     = par.noisePar.nHits;
     unsigned int hitFloor  = par.noisePar.hitFloor;
     unsigned int hitRoof   = hitFloor + nHits;
-    bool exactHit = ((nHits==1) && (hitFloor==0));
+    bool exactHit = par.noisePar.exactHit;
 
     std::string kmom  = par.momPar.kmom;
     std::string pmom  = par.momPar.pmom;
@@ -330,22 +329,16 @@ int main(int argc, char *argv[])
                                         par.charm1ActionPar.residual,
                                         par.charm2ActionPar.residual,
                                         par.charm3ActionPar.residual};
-    std::vector<double> loopInnerMADWFResidual = {par.lightActionPar.loopInnerMADWFResidual,
-                                                  par.charm1ActionPar.innerMADWFResidual,
-                                                  par.charm2ActionPar.innerMADWFResidual,
-                                                  par.charm3ActionPar.innerMADWFResidual};
-    std::vector<double> loopOuterMADWFResidual = {par.lightActionPar.loopOuterMADWFResidual,
-                                                  par.charm1ActionPar.outerMADWFResidual,
-                                                  par.charm2ActionPar.outerMADWFResidual,
-                                                  par.charm3ActionPar.outerMADWFResidual};
+    double loopInnerMADWFResidual = par.lightActionPar.loopInnerMADWFResidual;
+    double loopOuterMADWFResidual = par.lightActionPar.loopOuterMADWFResidual;
     double lightOuterMADWFResidual = par.lightActionPar.outerMADWFResidual;
     double lightInnerMADWFResidual = par.lightActionPar.innerMADWFResidual;
 
     unsigned int dwfLs    = par.dwfPar.Ls;
-    unsigned int dwfM5    = par.dwfPar.M5;
-    unsigned int dwfScale = par.dwfPar.scale;
+    double       dwfM5    = par.dwfPar.M5;
+    double       dwfScale = par.dwfPar.scale;
     unsigned int zmobLs = par.zMobiusPar.Ls;
-    unsigned int zmobM5 = par.zMobiusPar.M5;
+    double       zmobM5 = par.zMobiusPar.M5;
     std::string boundary = "1 1 1 -1";
     std::string twist = "0. 0. 0. 0.";
     unsigned int maxInnerIteration = 30000;
@@ -448,9 +441,6 @@ int main(int argc, char *argv[])
         ZMobFAction.gauge = "gaugefFix";
         ZMobFAction.Ls = zmobLs;
         ZMobFAction.M5 = zmobM5;
-        ZMobFAction.mass = mass[i];
-        ZMobFAction.Ls = Ls[1];
-        ZMobFAction.M5 = M5[1];
         ZMobFAction.mass = mass[1];
         ZMobFAction.boundary = boundary;
         ZMobFAction.b = par.zMobiusPar.b;
@@ -459,39 +449,51 @@ int main(int argc, char *argv[])
         ZMobFAction.twist = twist;
         application.createModule<MAction::ZMobiusDWFF>("dwff_" + flavour[1], ZMobFAction);
 
-        //outer action: Mobius double precision
+        // outer action: Mobius double precision
         MAction::ScaledDWF::Par MobActionPar;
         MobActionPar.gauge = "gaugeFix";
-        MobActionPar.Ls = par.MADWFPar.Ls;
-        MobActionPar.M5 = par.MADWFPar.M5;
+        MobActionPar.Ls = dwfLs;
+        MobActionPar.M5 = dwfM5;
         MobActionPar.mass = mass[1];
         MobActionPar.boundary = boundary;
-        MobActionPar.scale = par.MADWFPar.scale; 
+        MobActionPar.scale = dwfScale;
         MobActionPar.twist = twist;
         application.createModule<MAction::ScaledDWF>("dwf_" + flavour[1], MobActionPar);
     
-        //MADWF solver light
+        // MADWF solver light
         MSolver::ZMADWFMixedPrecCG::Par MADWFPar;
         MADWFPar.innerAction = "dwff_" + flavour[1];
         MADWFPar.outerAction = "dwf_" + flavour[1];
         MADWFPar.maxInnerIteration = 30000;
         MADWFPar.maxOuterIteration = 100;
         MADWFPar.maxPVIteration = 30000;
-        MADWFPar.innerResidual = loopInnerMADWFResidual[1];
-        MADWFPar.outerResidual = loopOuterMADWFResidual[1];
+        MADWFPar.innerResidual = loopInnerMADWFResidual;
+        MADWFPar.outerResidual = loopOuterMADWFResidual;
         MADWFPar.eigenPack = epack[1];
-        application.createModule<MSolver::ZMADWFMixedPrecCG>("loopMcg_" + flavour[1], MADWFPar);     
+        application.createModule<MSolver::ZMADWFMixedPrecCG>("loopMcg_" + flavour[1], MADWFPar);
+
+        // Solver (non-loop): light
+        MSolver::ZMADWFMixedPrecCG::Par MADWFActionPar;
+        MADWFActionPar.innerAction = "dwff_" + flavour[1];
+        MADWFActionPar.outerAction = "dwf_" + flavour[1];
+        MADWFActionPar.maxInnerIteration = maxInnerIteration;
+        MADWFActionPar.maxOuterIteration = maxOuterIteration;
+        MADWFActionPar.maxPVIteration = maxPVIteration;
+        MADWFActionPar.innerResidual = lightInnerMADWFResidual;
+        MADWFActionPar.outerResidual = lightOuterMADWFResidual;
+        MADWFActionPar.eigenPack = epack[1];
+        application.createModule<MSolver::ZMADWFMixedPrecCG>("mcg_" + flavour[1], MADWFActionPar);
 
         for (unsigned int i = 2; i < flavour.size(); ++i)
         {
             //inner action: Mobius single precision
             MAction::ScaledDWFF::Par MobFActionPar;
             MobFActionPar.gauge = "gaugefFix";
-            MobFActionPar.Ls = par.MADWFPar.Ls;
-            MobFActionPar.M5 = par.MADWFPar.M5;
+            MobFActionPar.Ls = dwfLs;
+            MobFActionPar.M5 = dwfM5;
             MobFActionPar.mass = mass[i];
             MobFActionPar.boundary = boundary;
-            MobFActionPar.scale = par.MADWFPar.scale; 
+            MobFActionPar.scale = dwfScale;
             MobFActionPar.twist = twist;
             application.createModule<MAction::ScaledDWFF>("dwff_" + flavour[i], MobFActionPar);
 
@@ -516,17 +518,6 @@ int main(int argc, char *argv[])
             MobSolverPar.eigenPack = epack[i];
             application.createModule<MSolver::MixedPrecisionRBPrecCG>("loopMcg_" + flavour[i], MobSolverPar);
         }
-        // Solver (non-loop): light
-        MSolver::ZMADWFMixedPrecCG::Par MADWFActionPar;
-        MADWFActionPar.innerAction = "dwff_" + flavour[1];
-        MADWFActionPar.outerAction = "dwf_" + flavour[1];
-        MADWFActionPar.maxInnerIteration = maxInnerIteration;
-        MADWFActionPar.maxOuterIteration = maxOuterIteration;
-        MADWFActionPar.maxPVIteration = maxPVIteration;
-        MADWFActionPar.innerResidual = lightInnerMADWFResidual;
-        MADWFActionPar.outerResidual = lightOuterMADWFResidual;
-        MADWFActionPar.eigenPack = epack[1];
-        application.createModule<MSolver::ZMADWFMixedPrecCG>("mcg_" + flavour[1], MADWFActionPar); 
     }
     // Mixed Precision
     else
@@ -536,8 +527,8 @@ int main(int argc, char *argv[])
             // actionF light
             MAction::ZMobiusDWFF::Par ZMobFAction;
             ZMobFAction.gauge = "gaugefFix";
-            ZMobFAction.Ls = Ls[1];
-            ZMobFAction.M5 = M5[1];
+            ZMobFAction.Ls = zmobLs;
+            ZMobFAction.M5 = zmobM5;
             ZMobFAction.mass = mass[i];
             ZMobFAction.boundary = boundary;
             ZMobFAction.b = par.zMobiusPar.b;
