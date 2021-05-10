@@ -115,7 +115,7 @@ namespace RareKaonInputs
                                         double,       M5,
                                         double,       b,
                                         double,       c,
-                                        std::vector<ComplexD>, omega);
+                                        std::vector<std::complex<double>>, omega);
     };
 
     class DWFPar : Serializable
