@@ -103,6 +103,7 @@ namespace RareKaonInputs
                                         unsigned int, epackSize,
                                         unsigned int, epackLs,
                                         bool,         epackMultiFile,
+                                        bool,         epackDoublePrec,
                                         std::string,  resultStem,
                                         std::string,  xmlFileName);
     };
@@ -383,18 +384,31 @@ int main(int argc, char *argv[])
     // epack
     if (!(par.ioPar.epackFile.empty()))
     {
-        // gauge field cast
-        MUtilities::ColourMatrixSinglePrecisionCast::Par gaugefXformPar;
-        gaugefXformPar.field = "gaugeFix_xform";
-        application.createModule<MUtilities::ColourMatrixSinglePrecisionCast>("gaugefFix_xform", gaugefXformPar);
+        if (par.ioPar.epackDoublePrec)
+        {
+            MIO::LoadFermionEigenPackIo32::Par epackPar;
+            epackPar.filestem = par.ioPar.epackFile;
+            epackPar.multiFile = par.ioPar.epackMultiFile;
+            epackPar.size = par.ioPar.epackSize;
+            epackPar.Ls = par.ioPar.epackLs;
+            epackPar.gaugeXform = "gaugefFix_xform";
+            application.createModule<MIO::LoadFermionEigenPackIo32>("epack_l", epackPar);
+        }
+        else
+        {
+            // gauge field cast
+            MUtilities::ColourMatrixSinglePrecisionCast::Par gaugefXformPar;
+            gaugefXformPar.field = "gaugeFix_xform";
+            application.createModule<MUtilities::ColourMatrixSinglePrecisionCast>("gaugefFix_xform", gaugefXformPar);
 
-        MIO::LoadFermionEigenPackF::Par epackPar;
-        epackPar.filestem = par.ioPar.epackFile;
-        epackPar.multiFile = par.ioPar.epackMultiFile;
-        epackPar.size = par.ioPar.epackSize;
-        epackPar.Ls = par.ioPar.epackLs;
-        epackPar.gaugeXform = "gaugefFix_xform";
-        application.createModule<MIO::LoadFermionEigenPackF>("epack_l", epackPar);
+            MIO::LoadFermionEigenPackF::Par epackPar;
+            epackPar.filestem = par.ioPar.epackFile;
+            epackPar.multiFile = par.ioPar.epackMultiFile;
+            epackPar.size = par.ioPar.epackSize;
+            epackPar.Ls = par.ioPar.epackLs;
+            epackPar.gaugeXform = "gaugefFix_xform";
+            application.createModule<MIO::LoadFermionEigenPackF>("epack_l", epackPar);
+        }
     }
     else
     {

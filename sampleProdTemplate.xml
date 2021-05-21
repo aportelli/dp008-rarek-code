@@ -59,6 +59,7 @@
         <epackSize>0</epackSize>
         <epackLs>0</epackLs>
         <epackMultiFile>false</epackMultiFile>
+        <epackDoublePrec>false</epackDoublePrec>
         <scheduleFile></scheduleFile>
         <resultStem>./result/k000_p100/</resultStem>
         <xmlFileName>./par/sampleProd.xml</xmlFileName>

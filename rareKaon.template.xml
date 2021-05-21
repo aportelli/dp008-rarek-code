@@ -59,6 +59,7 @@
         <epackSize>2000</epackSize>
         <epackLs>10</epackLs>
         <epackMultiFile>true</epackMultiFile>
+        <epackDoublePrec>@epackD@</epackDoublePrec>
         <resultStem>./result/k000_p@pmom@/@resStem@</resultStem>
         <xmlFileName>./hadronsxml/rarekaon_000_@pmom@_tK@dtK@_tpi@dtP@_tJ@dtJ@_witheye_@ti@_@ts@_@tf@.xml</xmlFileName>
     </ioPar>
