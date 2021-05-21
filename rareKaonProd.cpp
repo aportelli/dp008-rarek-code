@@ -702,7 +702,7 @@ int main(int argc, char *argv[])
         //////////////////////////////////////////////////
         // Zero momentum
         std::string qWallksZeromom = "QWall_s_0mom_" + stk;
-        makeWallProp(application, strangeSolver, kmom, tk, qWallksZeromom, 0);
+        makeWallProp(application, strangeSolver, kmom, tk, qWallksZeromom, false);
         std::string qWallklZeromom = "QWall_l_0mom_" + stk;
         makeWallProp(application, lightSolver, kmom, tk, qWallklZeromom, !useMADWF);
         std::string qWallplZeromom = "QWall_l_0mom_" + stp;
@@ -745,7 +745,7 @@ int main(int argc, char *argv[])
                      tj, qmom, qWallklZeromom, wallSourceKmomK, seqVcKLQmom, !useMADWF);
         std::string seqVcKSMqmom = "VC" + smu + "_KS_" + qWallksZeromom;
         makeSeqProp(application, strangeSolver, strangeAction,
-                    tj, mqmom, qWallksZeromom, wallSourceKmomK, seqVcKSMqmom, 0);
+                    tj, mqmom, qWallksZeromom, wallSourceKmomK, seqVcKSMqmom, false);
         std::string seqVcPLMqmom = "VC" + smu + "_PL_" + qWallplZeromom;
         makeSeqProp(application, lightSolver, lightAction,
                      tj, mqmom, qWallplZeromom, wallSourcePmomK, seqVcPLMqmom, !useMADWF);
