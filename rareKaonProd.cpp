@@ -391,7 +391,7 @@ int main(int argc, char *argv[])
             epackPar.multiFile = par.ioPar.epackMultiFile;
             epackPar.size = par.ioPar.epackSize;
             epackPar.Ls = par.ioPar.epackLs;
-            epackPar.gaugeXform = "gaugefFix_xform";
+            epackPar.gaugeXform = "gaugeFix_xform";
             application.createModule<MIO::LoadFermionEigenPackIo32>("epack_l", epackPar);
         }
         else
