@@ -136,8 +136,10 @@ namespace RareKaonInputs
                                         double, residual,
                                         double, loopResidual,
                                         double, innerMADWFResidual,
+                                        double, PvMADWFResidual,
                                         double, outerMADWFResidual,
                                         double, loopInnerMADWFResidual,
+                                        double, loopPvMADWFResidual,
                                         double, loopOuterMADWFResidual);
     };
 
@@ -331,8 +333,10 @@ int main(int argc, char *argv[])
                                         par.charm2ActionPar.residual,
                                         par.charm3ActionPar.residual};
     double loopInnerMADWFResidual = par.lightActionPar.loopInnerMADWFResidual;
+    double loopPvMADWFResidual = par.lightActionPar.loopPvMADWFResidual;
     double loopOuterMADWFResidual = par.lightActionPar.loopOuterMADWFResidual;
     double lightOuterMADWFResidual = par.lightActionPar.outerMADWFResidual;
+    double lightPvMADWFResidual = par.lightActionPar.PvMADWFResidual;
     double lightInnerMADWFResidual = par.lightActionPar.innerMADWFResidual;
 
     unsigned int dwfLs    = par.dwfPar.Ls;
@@ -482,6 +486,7 @@ int main(int argc, char *argv[])
         MADWFPar.maxOuterIteration = 100;
         MADWFPar.maxPVIteration = 30000;
         MADWFPar.innerResidual = loopInnerMADWFResidual;
+        MADWFPar.PVResidual    = loopPvMADWFResidual;
         MADWFPar.outerResidual = loopOuterMADWFResidual;
         MADWFPar.eigenPack = epack[1];
         application.createModule<MSolver::ZMADWFMixedPrecCG>("loopMcg_" + flavour[1], MADWFPar);
@@ -494,6 +499,7 @@ int main(int argc, char *argv[])
         MADWFActionPar.maxOuterIteration = maxOuterIteration;
         MADWFActionPar.maxPVIteration = maxPVIteration;
         MADWFActionPar.innerResidual = lightInnerMADWFResidual;
+        MADWFActionPar.PVResidual    = lightPvMADWFResidual;
         MADWFActionPar.outerResidual = lightOuterMADWFResidual;
         MADWFActionPar.eigenPack = epack[1];
         application.createModule<MSolver::ZMADWFMixedPrecCG>("mcg_" + flavour[1], MADWFActionPar);
