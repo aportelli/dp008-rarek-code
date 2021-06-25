@@ -102,8 +102,10 @@
         <residual>1e-02</residual>
         <loopResidual>1e-02</loopResidual>
         <innerMADWFResidual>1e-02</innerMADWFResidual>
+        <PvMADWFResidual>1e-02</PvMADWFResidual>
         <outerMADWFResidual>1e-02</outerMADWFResidual>
         <loopInnerMADWFResidual>1e-02</loopInnerMADWFResidual>
+        <loopPvMADWFResidual>1e-02</loopPvMADWFResidual>
         <loopOuterMADWFResidual>1e-02</loopOuterMADWFResidual>
     </lightActionPar>
     <charm1ActionPar>

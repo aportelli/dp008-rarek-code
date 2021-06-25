@@ -100,9 +100,11 @@
         <mass>0.00078</mass>
         <residual>1e-08</residual>
         <loopResidual>1e-04</loopResidual>
-        <innerMADWFResidual>1e-08</innerMADWFResidual>
+        <innerMADWFResidual>1e-04</innerMADWFResidual>
+        <PvMADWFResidual>1e-04</PvMADWFResidual>
         <outerMADWFResidual>1e-08</outerMADWFResidual>
-        <loopInnerMADWFResidual>1e-08</loopInnerMADWFResidual>
+        <loopInnerMADWFResidual>1e-04</loopInnerMADWFResidual>
+        <loopPvMADWFResidual>1e-04</loopPvMADWFResidual>
         <loopOuterMADWFResidual>1e-08</loopOuterMADWFResidual>
     </lightActionPar>
     <charm1ActionPar>
