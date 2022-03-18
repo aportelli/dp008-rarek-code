@@ -1,3 +1,27 @@
+/*
+ * rareKaonProd.cpp, part of RareK (https://github.com/aportelli/dp008-rarek-code)
+ *
+ * Copyright (C) 2015 - 2022
+ *
+ * Authors: Felix Erben, Fionn Ó hÓgáin, and Antonin Portelli
+ *
+ * Hadrons is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Hadrons is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Hadrons.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * See the full license in the file "LICENSE" in the top level distribution 
+ * directory.
+ */
+
 #include "Utils/ApplicationUtils.hpp"
 #include <Grid/Grid.h>
 #include <Hadrons/A2AVectors.hpp>
