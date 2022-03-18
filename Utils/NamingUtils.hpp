@@ -1,5 +1,5 @@
 /*
- * EntryUtils.hpp, part of RareK (https://github.com/aportelli/dp008-rarek-code)
+ * NamingUtils.hpp, part of RareK (https://github.com/aportelli/dp008-rarek-code)
  *
  * Copyright (C) 2015 - 2022
  *
